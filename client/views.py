@@ -57,6 +57,6 @@ class MainContent(Gtk.Grid):
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         box.pack_start(Gtk.Label(label=c), True, True, 0)
         box.pack_start(Gtk.RadioButton(label="connected?"), True, True,0)
-        box.connect("clicked", gui_callbacks.)
+        #box.connect("clicked", gui_callbacks.channel_callback)
         row.add(box)
         return row
