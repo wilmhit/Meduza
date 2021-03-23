@@ -1,25 +1,34 @@
-import pyaudio
+from time import sleep
 import socket
 import sys
+from threading import Thread
 
-FORMAT = pyaudio.paInt16
-CHANNELS = 1
-RATE = 44100
 CHUNK = 4096
+SERVER_ADDRESS = ('127.0.0.1', 10000)
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((sys.argv[1], int(sys.argv[2]))) # adres serwera, port rzutowany na INT
-audio = pyaudio.PyAudio()
-stream = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, output=True, frames_per_buffer=CHUNK) #rozpoczęcie streamowania
+soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+soc.bind(('127.0.0.1', 9999))
 
-try:
+def receive_thread():
     while True:
-        data = s.recv(CHUNK)
-        stream.write(data)
-except KeyboardInterrupt:
-    pass
+        data, addr = soc.recvfrom(CHUNK)
+        print(addr, " sends message: ", data)
 
-print('Shutting down')
-s.close()
-stream.close()
-audio.terminate()
+def send_thread():
+    while True:
+        sleep(1)
+        soc.sendto(b'Hello World', SERVER_ADDRESS)
+
+def main():
+    print('Staring Threads...')
+    listner = Thread(target=receive_thread)
+    sender = Thread(target=send_thread)
+    listner.start()
+    sender.start()
+    print('Threads running...')
+    listner.join()
+    sender.join()
+    print('Shutting down...')
+
+if __name__ == '__main__':
+    main()
