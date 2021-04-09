@@ -10,3 +10,4 @@ if __name__ == "__main__":
     ui_thread = Thread(target=Gtk.main)
     ui_thread.start()
     ui_thread.join()
+    
