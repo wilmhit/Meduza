@@ -9,6 +9,10 @@ class ConnetionError(BaseException):
     """Cannot connect to server"""
     pass
 
+class PasswordError(BaseException):
+    """Channel is secured with password"""
+    pass
+
 def connect():
     connection = ConnectionManager("127.0.0.1", 50001)
     connection.connect_channel(1)
@@ -21,21 +25,47 @@ def connect():
 
 class ConnectionManager():
     def __init__(self, server_address, server_port):
-        self.server_address = server_address
-        self.server_port = server_port
+        self.server_address = (server_address, server_port)
         self.metadata_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        if not self.ping(server_address, server_port):
+        if not self.ping():
             raise
 
-    def ping(self, ip, port):
-        message = b"PING"
-        self.metadata_socket.sendto(message, (ip, port))
-        returned, server = self.metadata_socket.recvfrom(4)
-        return returned == b"PONG"
+    def ping(self):
+        fill = b"\0" * 29
+        message = b"PNG" + fill
+        self.metadata_socket.sendto(message, self.server_address)
+        returned, server = self.metadata_socket.recvfrom(32)
+        return returned == b"PGR" + fill
 
-    def connect_channel(self, channel):
-        message = b"Hey, i want to connent to channel: " + bytes(str(channel), "UTF-8")
-        self.metadata_socket.sendto(message, (self.server_address, self.server_port))
+    def _send_connect_message(self, channel):
+        channel_bytes = channel.to_bytes(2, "big")
+        fill = b"\0" * 27
+        message = b"CON" + channel_bytes + fill
+        self.metadata_socket.sendto(message, self.server_address)
+
+    def _connect_channel(self, channel):
+        self._send_connect_message(channel)
+        response, _ = self.metadata_socket.recvfrom(32)
+        return self._read_channel_connection_response(response)
+
+    def _read_channel_connection_response(self, response):
+        if response.startswith(b"DEN"):
+            return False
+        if response.startswith(b"PRQ"):
+            raise PasswordError()
+        if not response.startswith(b"ACC"):
+            raise ConnectionError("Server sent invalid response")
+        return True
+
+    def _connect_securely(self, channel, password):
+        pass
+
+    def connect_channel(self, channel: int, password=None) -> bool:
+        if password is not None:
+            return _connect_securely(channel, password)
+        return _connect_channel(channel)
+
+        return True
         ## ESTABLISHING AUDIO PORT
         # Send request from client metadata port to server metadata port
         # In request include channel you want to connect to
