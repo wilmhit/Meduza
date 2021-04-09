@@ -16,7 +16,6 @@ class PasswordError(BaseException):
 def connect():
     connection = ConnectionManager("127.0.0.1", 50001)
     connection.connect_channel(1)
-    # connection.connect_channel(user_selected_channel)
     # use pyAudio to open recording and listening streams
     # while True:
     # throw recv_audio_packet() to listening stream
@@ -55,17 +54,21 @@ class ConnectionManager():
             raise PasswordError()
         if not response.startswith(b"ACC"):
             raise ConnectionError("Server sent invalid response")
+        self.port = 123 # TODO Read from response
         return True
 
-    def _connect_securely(self, channel, password):
+    def _send_secure_connect_message(self, channel, password):
         pass
+
+    def _connect_securely(self, channel, password):
+        self._send_connect_message(channel)
+        response, _ = self.metadata_socket.recvfrom(32)
+        return self._read_channel_connection_response(response)
 
     def connect_channel(self, channel: int, password=None) -> bool:
         if password is not None:
             return _connect_securely(channel, password)
         return _connect_channel(channel)
-
-        return True
         ## ESTABLISHING AUDIO PORT
         # Send request from client metadata port to server metadata port
         # In request include channel you want to connect to
