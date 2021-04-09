@@ -3,11 +3,14 @@ import socket
 # This is basic draft
 # Make this work for now
 # It doesn't need to change channels or talk to gui as of now
-SERVER_ADDRESS = ("1.123.12.2", )
 
+
+class ConnetionError(BaseException):
+    """Cannot connect to server"""
+    pass
 
 def connect():
-    connection = ConnectionManager()
+    connection = ConnectionManager("127.0.0.1", 50001)
     connection.connect_channel(1)
     # connection.connect_channel(user_selected_channel)
     # use pyAudio to open recording and listening streams
@@ -21,20 +24,18 @@ class ConnectionManager():
         self.server_address = server_address
         self.server_port = server_port
         self.metadata_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        # Open 2 random ports: 1. Metadata port 2. Audio port
-        # Check here connection to server metadata port using
-        # client metadata port
-        pass
+        if not self.ping(server_address, server_port):
+            raise
 
     def ping(self, ip, port):
         message = b"PING"
-        self.metadata_socket.sendto(message, ip, port)
+        self.metadata_socket.sendto(message, (ip, port))
         returned, server = self.metadata_socket.recvfrom(4)
         return returned == b"PONG"
 
     def connect_channel(self, channel):
-        message = b"Hey, i want to connent to channel: " + channel
-        self.metadata_socket.sendto(message, self.server_address, self.server_port)
+        message = b"Hey, i want to connent to channel: " + bytes(str(channel), "UTF-8")
+        self.metadata_socket.sendto(message, (self.server_address, self.server_port))
         ## ESTABLISHING AUDIO PORT
         # Send request from client metadata port to server metadata port
         # In request include channel you want to connect to
