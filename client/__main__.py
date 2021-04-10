@@ -3,7 +3,7 @@
 #from gi.repository import Gtk
 #from views import MainWindow
 #from threading import Thread
-from audio import connect
+from channels import connect
 
 if __name__ == "__main__":
     connect()
