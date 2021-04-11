@@ -13,21 +13,27 @@ class voip_server:
         self.active_cli = 0
         self.next_port = 50100
 
-    def create_client_thread(self):
+    def create_client_thread(self, data):
         cli = client(self.IP_address, self.next_port)
-        self.next_port += 1
-        client_thr = Thread(target=cli)
+        client_thr = Thread(target=cli.listen)
         client_thr.start()
+        self.sock.sendto(bytes(self.next_port), (data[1][0], data[1][1]))
+        print("New client", self.IP_address, "-", self.next_port)
+
+        self.next_port += 1
 
     def listen(self):
         print("listen method - ON\n")
         while True:
-            data = self.sock.recvfrom(32) # buffer size is 1024 bytes 0 - data, 1 IP [0] / PORT [1] 
+            data = self.sock.recvfrom(32) #buffer size is 1024 bytes 0 - data, 1 IP [0] / PORT [1] 
             print("received message: %s" % data[0])
-            
+            if(str(data[0][0:3], "UTF-8") == "PNG"): #żądanie rozpoczącia połączenia
+                self.create_client_thread(data)
+            else:
+                print("Wrong signal from new host  :(")
             
             #MESSAGE = b"PONG"
-            #self.sock.sendto(MESSAGE, (data[1][0], data[1][1]))
+            #self.sock.sendto(b"hejka", (data[1][0], data[1][1]))
 
 
 
