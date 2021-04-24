@@ -27,7 +27,7 @@ class ConnectionManager():
         self.server_address = (server_address, server_port)
         self.metadata_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         if not self.ping():
-            raise
+            raise ConnetionError()
 
     def ping(self):
         fill = b"\0" * 29
@@ -67,8 +67,8 @@ class ConnectionManager():
 
     def connect_channel(self, channel: int, password=None) -> bool:
         if password is not None:
-            return _connect_securely(channel, password)
-        return _connect_channel(channel)
+            return self._connect_securely(channel, password) # dodanie .self
+        return self._connect_channel(channel)
         ## ESTABLISHING AUDIO PORT
         # Send request from client metadata port to server metadata port
         # In request include channel you want to connect to
