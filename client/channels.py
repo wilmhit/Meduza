@@ -38,11 +38,11 @@ class ConnectionManager():
 
     def _read_channel_connection_response(self, response):
         response = Signal(response)
-        if response.code = b"DEN":
+        if response.code == b"DEN":
             return False
-        if response.code = b"PRQ":
+        if response.code == b"PRQ":
             raise PasswordError()
-        if not response.code = b"ACC":
+        if not response.code == b"ACC":
             raise ConnectionError("Server sent invalid response")
         self.port = int.from_bytes(response.two_byte, "big")
         return True

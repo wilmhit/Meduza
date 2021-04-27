@@ -1,22 +1,24 @@
 from gi.repository import Gtk
-import gui_callbacks
+from . import gui_callbacks
 
-class MainWindow(Gtk.Window):
+class MainWindow(Gtk.ApplicationWindow):
     def __init__(self):
-        Gtk.Window.__init__(self)
+        Gtk.ApplicationWindow.__init__(self)
         self.connect("destroy", Gtk.main_quit)
-        #self.set_default_size(700, 500)
         self.set_border_width(20)
-        self.set_titlebar(Header())
+        self.set_titlebar(MainHeaderBar(self.show_dialog))
         self.add(MainContent())
 
-class Header(Gtk.HeaderBar):
-    def __init__(self):
+    def show_dialog(self, _):
+        PasswordModal(self).run()
+
+class MainHeaderBar(Gtk.HeaderBar):
+    def __init__(self, disconnect_callback):
         Gtk.HeaderBar.__init__(self, title="Meduza 007")
         self.set_show_close_button(True)
 
         disconnect_button = Gtk.Button(label="Disconnect")
-        disconnect_button.connect("clicked", gui_callbacks.disconnect_button)
+        disconnect_button.connect("clicked", disconnect_callback)
         self.pack_start(disconnect_button)
 
 class MainContent(Gtk.Grid):
@@ -60,3 +62,24 @@ class MainContent(Gtk.Grid):
         #box.connect("clicked", gui_callbacks.channel_callback)
         row.add(box)
         return row
+
+class PasswordModal(Gtk.Dialog):
+    def __init__(self, parent):
+        Gtk.Dialog.__init__(self, parent=parent, use_header_bar=True)
+        self.add_button("_OK", Gtk.ResponseType.OK)
+        self.add_button("_Cancel", Gtk.ResponseType.CANCEL)
+        self.connect("response", self.on_response)
+
+        label = Gtk.Label("Password is needed to connect to this channel")
+        self.vbox.add(label)
+        self.show_all()
+
+    def on_response(self, dialog, response):
+            if response == Gtk.ResponseType.OK:
+                print("OK button clicked")
+            elif response == Gtk.ResponseType.CANCEL:
+                print("Cancel button clicked")
+            else:
+                print("Dialog closed")
+
+            dialog.destroy()

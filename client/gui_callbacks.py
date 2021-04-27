@@ -17,5 +17,11 @@ def mute_mic_checkbox(button):
 def channel_callback():
     print("Input received!")
 
+def cancel_password_modal(button):
+    print("Input received!")
+
+def connect_with_password(button):
+    print("Input received!")
+
 def get_channels():
     return ["Channel 1", "Channel 2"]
