@@ -18,7 +18,7 @@ class ConnectionManager():
         self.server_address = (server_address, server_port)
         self.metadata_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         if not self.ping():
-            raise
+            raise ConnetionError()
 
     def ping(self):
         message = Signal()
@@ -66,8 +66,8 @@ class ConnectionManager():
 
     def connect_channel(self, channel: int, password=None) -> bool:
         if password is not None:
-            return _connect_securely(channel, password)
-        return _connect_channel(channel)
+            return self._connect_securely(channel, password)
+        return self._connect_channel(channel)
 
 def hash_pw(password):
     return b"x" * 27 # TODO
