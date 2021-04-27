@@ -14,8 +14,8 @@ def mute_all_checkbox(button):
 def mute_mic_checkbox(button):
     print("Input received!")
 
-def channel_callback():
-    print("Input received!")
+def channel_callback(channel):
+    print(channel)
 
 def cancel_password_modal(button):
     print("Input received!")

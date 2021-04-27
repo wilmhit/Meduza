@@ -1,6 +1,8 @@
 from gi.repository import Gtk
 from . import gui_callbacks
 
+MAX_PASSWORD_LEN = 10
+
 class MainWindow(Gtk.ApplicationWindow):
     def __init__(self):
         Gtk.ApplicationWindow.__init__(self)
@@ -28,7 +30,6 @@ class MainContent(Gtk.Grid):
         self.set_row_spacing(10)
 
         boom_button = Gtk.Button(label="Detonate")
-        channel_0_button = Gtk.Button(label="Connenct to channel 0")
         mute_mic_checkbox = Gtk.CheckButton(label="Mute mic")
         mute_all_checkbox = Gtk.CheckButton(label="Mute all")
 
@@ -37,13 +38,13 @@ class MainContent(Gtk.Grid):
         framed_channel_list.add(channel_list)
 
         boom_button.connect("clicked", gui_callbacks.boom_button)
-        channel_0_button.connect("clicked", gui_callbacks.channel_0_button)
         mute_mic_checkbox.connect("clicked", gui_callbacks.mute_mic_checkbox)
         mute_all_checkbox.connect("clicked", gui_callbacks.mute_all_checkbox)
 
         for channel in self.get_channels():
             channel_list.add(channel)
 
+        # Row Column Width Height        R  C  W  H
         self.attach(framed_channel_list, 0, 0, 1, 4)
         self.attach(mute_all_checkbox,   1, 0, 1, 1)
         self.attach(mute_mic_checkbox,   1, 1, 1, 1)
@@ -54,12 +55,15 @@ class MainContent(Gtk.Grid):
         channels: list = gui_callbacks.get_channels()
         return [self.map_channel(c) for c in channels]
 
-    def map_channel(self, c):
+    def map_channel(self, channel):
         row = Gtk.ListBoxRow()
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        box.pack_start(Gtk.Label(label=c), True, True, 0)
-        box.pack_start(Gtk.RadioButton(label="connected?"), True, True,0)
-        #box.connect("clicked", gui_callbacks.channel_callback)
+        box.set_border_width(5)
+
+        radio = Gtk.RadioButton(label=channel)
+        radio.connect("clicked", lambda _ : gui_callbacks.channel_callback(c))
+
+        box.pack_start(radio, True, True, 0)
         row.add(box)
         return row
 
@@ -71,15 +75,23 @@ class PasswordModal(Gtk.Dialog):
         self.connect("response", self.on_response)
 
         label = Gtk.Label("Password is needed to connect to this channel")
+        label.set_padding(30, 30)
+        label.set_justify(Gtk.Justification.CENTER)
+
+        self.entry = Gtk.Entry()
+        self.entry.set_max_length(MAX_PASSWORD_LEN)
+        self.entry.set_margin_bottom(30)
+        self.entry.set_margin_left(30)
+        self.entry.set_margin_right(30)
+
         self.vbox.add(label)
+        self.vbox.add(self.entry)
+        self.vbox.set_border_width(10)
         self.show_all()
 
     def on_response(self, dialog, response):
-            if response == Gtk.ResponseType.OK:
-                print("OK button clicked")
-            elif response == Gtk.ResponseType.CANCEL:
-                print("Cancel button clicked")
-            else:
-                print("Dialog closed")
-
-            dialog.destroy()
+        if response == Gtk.ResponseType.OK:
+            print(self.entry.get_text())
+        else:
+            print("Cancel button clicked")
+        dialog.destroy()
