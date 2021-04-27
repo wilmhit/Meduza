@@ -1,6 +1,19 @@
 
+gui_state = {
+    "connect_label": "Connect",
+    "channels": {
+        "Channel 1": {
+            "connected": True
+        },
+        "Channel 2": {
+            "connected": False
+        }
+    }
+}
+
 def disconnect_button(button):
     print("Input received!")
+    gui_state["connect_label"] = "Disconnect"
 
 def boom_button(button):
     print("Input received!")

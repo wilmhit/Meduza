@@ -19,8 +19,8 @@ class MainHeaderBar(Gtk.HeaderBar):
         Gtk.HeaderBar.__init__(self, title="Meduza 007")
         self.set_show_close_button(True)
 
-        disconnect_button = Gtk.Button(label="Disconnect")
-        disconnect_button.connect("clicked", disconnect_callback)
+        disconnect_button = Gtk.Button(label=gui_callbacks.gui_state["connect_label"])
+        disconnect_button.connect("clicked", gui_callbacks.disconnect_button)
         self.pack_start(disconnect_button)
 
 class MainContent(Gtk.Grid):
@@ -49,7 +49,6 @@ class MainContent(Gtk.Grid):
         self.attach(mute_all_checkbox,   1, 0, 1, 1)
         self.attach(mute_mic_checkbox,   1, 1, 1, 1)
         self.attach(boom_button,         1, 2, 1, 1)
-        self.attach(channel_0_button,    1, 3, 1, 1)
 
     def get_channels(self):
         channels: list = gui_callbacks.get_channels()
@@ -60,10 +59,16 @@ class MainContent(Gtk.Grid):
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         box.set_border_width(5)
 
-        radio = Gtk.RadioButton(label=channel)
-        radio.connect("clicked", lambda _ : gui_callbacks.channel_callback(c))
+        def checkbox_callback(_):
+            gui_callbacks.channel_callback(channel)
+            value_to_set = False
+            if gui_callbacks.gui_state["channels"][channel]["connected"]:
+                value_to_set = True
+            checkbox.set_active(value_to_set)
+        checkbox = Gtk.CheckButton(label=channel)
+        checkbox.connect("clicked", checkbox_callback)
 
-        box.pack_start(radio, True, True, 0)
+        box.pack_start(checkbox, True, True, 0)
         row.add(box)
         return row
 
