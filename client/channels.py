@@ -1,9 +1,5 @@
 import socket
-
-# This is basic draft
-# Make this work for now
-# It doesn't need to change channels or talk to gui as of now
-
+from signal_processing import Signal
 
 class ConnetionError(BaseException):
     """Cannot connect to server"""
@@ -16,11 +12,6 @@ class PasswordError(BaseException):
 def connect():
     connection = ConnectionManager("127.0.0.1", 50001)
     connection.connect_channel(1)
-    # use pyAudio to open recording and listening streams
-    # while True:
-    # throw recv_audio_packet() to listening stream
-    # throw send_audio_packet() to recording stream
-
 
 class ConnectionManager():
     def __init__(self, server_address, server_port):
@@ -30,35 +21,43 @@ class ConnectionManager():
             raise ConnetionError()
 
     def ping(self):
-        fill = b"\0" * 29
-        message = b"PNG" + fill
-        self.metadata_socket.sendto(message, self.server_address)
+        message = Signal()
+        message.code = b"PNG"
+
+        self.metadata_socket.sendto(message.get_message(), self.server_address)
         returned, server = self.metadata_socket.recvfrom(32)
-        return returned == b"PGR" + fill
+
+        returned = Signal(returned)
+        return returned.code == b"PGR"
 
     def _send_connect_message(self, channel):
-        channel_bytes = channel.to_bytes(2, "big")
-        fill = b"\0" * 27
-        message = b"CON" + channel_bytes + fill
-        self.metadata_socket.sendto(message, self.server_address)
+        message = Singal()
+        message.code = b"CON"
+        message.two_byte = channel
+        self.metadata_socket.sendto(message.get_message(), self.server_address)
+
+    def _read_channel_connection_response(self, response):
+        response = Signal(response)
+        if response.code == b"DEN":
+            return False
+        if response.code == b"PRQ":
+            raise PasswordError()
+        if not response.code == b"ACC":
+            raise ConnectionError("Server sent invalid response")
+        self.port = int.from_bytes(response.two_byte, "big")
+        return True
+
+    def _send_secure_connect_message(self, channel, password):
+        message = Signal()
+        message.code = "PASS"
+        message.two_byte = channel
+        message.password = hash_pw(password)
+        self.metadata_socket.sendto(message.get_message(), self.server_address)
 
     def _connect_channel(self, channel):
         self._send_connect_message(channel)
         response, _ = self.metadata_socket.recvfrom(32)
         return self._read_channel_connection_response(response)
-
-    def _read_channel_connection_response(self, response):
-        if response.startswith(b"DEN"):
-            return False
-        if response.startswith(b"PRQ"):
-            raise PasswordError()
-        if not response.startswith(b"ACC"):
-            raise ConnectionError("Server sent invalid response")
-        self.port = 123 # TODO Read from response
-        return True
-
-    def _send_secure_connect_message(self, channel, password):
-        pass
 
     def _connect_securely(self, channel, password):
         self._send_connect_message(channel)
@@ -67,23 +66,8 @@ class ConnectionManager():
 
     def connect_channel(self, channel: int, password=None) -> bool:
         if password is not None:
-            return self._connect_securely(channel, password) # dodanie .self
+            return self._connect_securely(channel, password)
         return self._connect_channel(channel)
-        ## ESTABLISHING AUDIO PORT
-        # Send request from client metadata port to server metadata port
-        # In request include channel you want to connect to
-        # Server sends back audio port
-        ## PUNCHING UDP HOLE
-        # Idk how to solve this. Client needs to send packet to first.
-        # Why? Server doesn't know what is client's audio port. You can't
-        # just send port number. NAT might change it without client knowing
-        # about it. Check wikipedia: UDP hole punching.
 
-    def recv_audio_packet(self):
-        # This method reads client audio port buffer
-        # Will raise an error if used before connect_channel(channel)
-        pass
-
-    def send_audio_packet(self):
-        # Same as above
-        pass
+def hash_pw(password):
+    return b"x" * 27 # TODO
