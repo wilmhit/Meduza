@@ -28,7 +28,6 @@ class ClientManager:
         print("New client", self.IP_address, "-", self.next_port)
         self.acepted_cb(data[1][0], data[1][1])
 
-
     def listen(self):
         print("listen method - ON\n")
         while True:
