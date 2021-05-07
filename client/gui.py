@@ -5,7 +5,5 @@ from .views import MainWindow, PasswordModal
 
 def run_gui():
     window = MainWindow()
-    #modal = PasswordModal()
     window.show_all()
-    #modal.show_all()
     Gtk.main()
