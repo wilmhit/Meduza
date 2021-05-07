@@ -48,12 +48,25 @@ class Channels:
 
 
     def add_user_to_channel(self, channel_number, userIP, userPort):
+        user = {
+            "IP": userIP,
+            "Port": userPort
+        }
+        self.channels[channel_number]['connected_users'].append(user)
+        pass
 
+    def del_user_from_channel(self, channel_number, userIP, userPort):
+        user = {
+            "IP": userIP,
+            "Port": userPort
+        }
+        self.channels[channel_number]['connected_users'].remove(user)
         pass
 
     def get_count_of_active_user(self, channel_number):
+        return len(self.channels[channel_number]['connected_users'])
 
-
-        pass
+    def get_list_users_on_chanel(self, channel_number):
+        return self.channels[channel_number]['connected_users']
 
 

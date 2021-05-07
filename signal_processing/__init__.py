@@ -4,7 +4,7 @@ class Signal:
         if message is not None:
             self.load_message(message)
         else:
-            self.code, self.two_byte, self.rest = None
+            self.code, self.two_byte, self.rest = None, None, None
 
     def load_message(self, message):
         self.code = message[:2]
@@ -16,11 +16,10 @@ class Signal:
         self.parse_bytes()
         self.parse_rest()
         return self.code + self.two_byte + self.rest
-    
+ 
     def parse_rest(self):
         if self.rest is None:
-            #self.rest = 0.to_bytes(27, "big")
-            pass
+            self.rest = int(0).to_bytes(27, "big")
         if len(self.rest) == 27:
             raise TypeError("Fill is not 27 bytes")
 

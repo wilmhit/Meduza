@@ -23,20 +23,27 @@ class ClientManager:
         self.sock.sendto(message.get_message(), sender_data)
 
     def _con_signal(self, data_signal, sender_data):
-
         if self.channels.get_count_of_active_user(data_signal.two_byte()) <= 5:
-            self.channels.add_user_to_channel()
+            self.channels.add_user_to_channel(data_signal.two_byte(), sender_data[0], sender_data[1])
             self._send_message("ACC", None, sender_data)
         else:
             self._send_message("DEN", None, sender_data)
 
-        pass
     def _png_signal(self, data_signal, sender_data):
         self._send_message("PGR", None, sender_data)
-        pass
+
     def _pas_signal(self, data_signal, sender_data):
-        pass
+        if data_signal.two_byte() == 0:
+            if data_signal.rest() == self.channels.channels[0]['password']:
+                self.channels.add_user_to_channel(data_signal.two_byte(), sender_data[0], sender_data[1])
+                self._send_message("ACC", None, sender_data)
+            else:
+                self._send_message("DEN", None, sender_data)
+        else:
+            self._con_signal(data_signal, sender_data)
+        
     def _xxx_signal(self, data_signal, sender_data):
+        self.channels.del_user_from_channel(data_signal.two_byte(), sender_data[0], sender_data[1])
         pass
 
     def _read_signal(self, data):
@@ -61,9 +68,17 @@ class ClientManager:
         self.port = int.from_bytes(data_signal.two_byte, "big")
         return True
 
+    def test_add(self):
+        self.channels.add_user_to_channel(1, "127.0.0.1", 50010)
+        self.channels.add_user_to_channel(1, "127.0.0.1", 50011)
+        self.channels.add_user_to_channel(1, "127.0.0.1", 50012)
+        print(self.channels.get_list_users_on_chanel(1))
+        self.channels.del_user_from_channel(1, "127.0.0.1", 50011)
+        print(self.channels.get_list_users_on_chanel(1))
 
     def listen(self):
         print("listen method - ON\n")
+
         while True:
             data = self.sock.recvfrom(32) #buffer size is 1024 bytes 0 - data, 1 IP [0] / PORT [1] 
             print("received message: %s" % data[0])
