@@ -63,7 +63,7 @@ class ClientManager:
             self._xxx_signal(data_signal, sender_data)
             pass
         else:
-            raise ConnectionError("Klient sent invalid signal")
+            raise ConnectionError("Client send invalid signal")
 
         self.port = int.from_bytes(data_signal.two_byte, "big")
         return True

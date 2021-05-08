@@ -1,4 +1,6 @@
 from random import randint
+from threading import Thread
+from .single_channel import Single_Channel
 
 PORT_MIN = 50100
 PORT_MAX = PORT_MIN + 500
@@ -13,7 +15,8 @@ class Channels:
             0:{
                 "port": PORT_MIN,
                 "password": channel_0_pass,
-                "connected_users":[]   
+                "connected_users":[],
+                "thread": Single_channel(0)
             }
         }
         for num in range(1, number_of_channels):
@@ -21,12 +24,15 @@ class Channels:
 
         print("channels dict has been created")
 
+
+
     def create_channel(self, channel_num):
         if channel_num not in self.channels:
             self.channels[channel_num] = {
                 "port":self.get_port_num(),
                 "password":None,
-                "connected_users":[]
+                "connected_users":[],
+                "thread": Single_channel(channel_num)
             }
 
     def get_port_num(self):
@@ -46,8 +52,8 @@ class Channels:
 
         return False
 
-
     def add_user_to_channel(self, channel_number, userIP, userPort):
+        
         user = {
             "IP": userIP,
             "Port": userPort
@@ -70,3 +76,4 @@ class Channels:
         return self.channels[channel_number]['connected_users']
 
 
+    
