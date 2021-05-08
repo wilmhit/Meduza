@@ -13,7 +13,6 @@ class ClientManager:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((self.IP_address, self.IP_port))
         self.acepted_cb = acepted_cb
-        
         self.channels = channels
 
     def _send_message(self, code, channel, sender_data):
@@ -44,7 +43,6 @@ class ClientManager:
         
     def _xxx_signal(self, data_signal, sender_data):
         self.channels.del_user_from_channel(data_signal.two_byte(), sender_data[0], sender_data[1])
-        pass
 
     def _read_signal(self, data):
 
@@ -52,33 +50,29 @@ class ClientManager:
         data_signal = Signal(data[0])
         if data_signal.code == b"CON":
             self._con_signal(data_signal, sender_data)
-            pass
         if data_signal.code == b"PNG":
             self._png_signal(data_signal, sender_data)
-            pass
         if data_signal.code == b"PAS":
             self._pas_signal(data_signal, sender_data)
-            pass
         if data_signal.code == b"XXX":
             self._xxx_signal(data_signal, sender_data)
-            pass
         else:
             raise ConnectionError("Client send invalid signal")
 
         self.port = int.from_bytes(data_signal.two_byte, "big")
-        return True
 
     def test_add(self):
         self.channels.add_user_to_channel(1, "127.0.0.1", 50010)
-        self.channels.add_user_to_channel(1, "127.0.0.1", 50011)
-        self.channels.add_user_to_channel(1, "127.0.0.1", 50012)
+        self.channels.add_user_to_channel(2, "127.0.0.1", 50011)
+        self.channels.add_user_to_channel(4, "127.0.0.1", 50012)
         print(self.channels.get_list_users_on_chanel(1))
-        self.channels.del_user_from_channel(1, "127.0.0.1", 50011)
+        self.channels.del_user_from_channel(2, "127.0.0.1", 50011)
         print(self.channels.get_list_users_on_chanel(1))
 
     def listen(self):
         print("listen method - ON\n")
 
+        self.test_add()
         while True:
             data = self.sock.recvfrom(32) #buffer size is 1024 bytes 0 - data, 1 IP [0] / PORT [1] 
             print("received message: %s" % data[0])
@@ -99,4 +93,3 @@ class Server:
 
     def run(self):
         self.client_manager.listen()
-        pass

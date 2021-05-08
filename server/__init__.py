@@ -3,8 +3,6 @@ pass
 import socket
 from threading import Thread
 from .voip_server import Server
-from .single_channel import Single_channel
-
 
 UDP_IP = "127.0.0.1"
 UDP_PORT = 50001

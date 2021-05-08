@@ -1,6 +1,6 @@
 from random import randint
 from threading import Thread
-from .single_channel import Single_Channel
+from .single_channel import SingleChannel
 
 PORT_MIN = 50100
 PORT_MAX = PORT_MIN + 500
@@ -16,9 +16,10 @@ class Channels:
                 "port": PORT_MIN,
                 "password": channel_0_pass,
                 "connected_users":[],
-                "thread": Single_channel(0)
+                "thread": SingleChannel(0, self.main_ip_address, PORT_MIN)
             }
         }
+
         for num in range(1, number_of_channels):
             self.create_channel(num)
 
@@ -28,11 +29,12 @@ class Channels:
 
     def create_channel(self, channel_num):
         if channel_num not in self.channels:
+            channnel_port = self.get_port_num()
             self.channels[channel_num] = {
-                "port":self.get_port_num(),
+                "port":channnel_port,
                 "password":None,
                 "connected_users":[],
-                "thread": Single_channel(channel_num)
+                "thread": SingleChannel(channel_num, self.main_ip_address, channnel_port)
             }
 
     def get_port_num(self):
@@ -53,21 +55,18 @@ class Channels:
         return False
 
     def add_user_to_channel(self, channel_number, userIP, userPort):
-        
-        user = {
-            "IP": userIP,
-            "Port": userPort
-        }
+
+        if not self.channels[channel_number]['connected_users']:
+            self.channels[channel_number]['thread'].start()
+
+        user = (userIP, userPort) 
         self.channels[channel_number]['connected_users'].append(user)
-        pass
 
     def del_user_from_channel(self, channel_number, userIP, userPort):
-        user = {
-            "IP": userIP,
-            "Port": userPort
-        }
+
+
+        user = (userIP, userPort)
         self.channels[channel_number]['connected_users'].remove(user)
-        pass
 
     def get_count_of_active_user(self, channel_number):
         return len(self.channels[channel_number]['connected_users'])
