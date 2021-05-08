@@ -1,96 +1,102 @@
 import socket
-from random import randint
 from threading import Thread
-from client import client
+from signal_processing import Signal
+from .channels import Channels
 
 
-PORT_MIN = 50100
-PORT_MAX = PORT_MIN + 500
 
 class ClientManager:
 
-    def __init__(self, IP_address, IP_port, acepted_cb):
+    def __init__(self, IP_address, IP_port, acepted_cb, channels):
         self.IP_address = IP_address
         self.IP_port = IP_port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((self.IP_address, self.IP_port))
         self.acepted_cb = acepted_cb
         
-        self.active_cli = 0
-        self.next_port = MIN_PORT
+        self.channels = channels
 
-    def create_client_thread(self, data):
-        #cli = client(self.IP_address, self.next_port) #bindowanie nowego portu dla klienta
-        #client_thr = Thread(target=cli.listen) #utworzenie wątku dla klienta na danym porcie
-        #client_thr.start() #uruchomienie wątku klienta
-        #msg = "SOK" + str(self.next_port)
-        self.sock.sendto(bytes('ACC' + , 'utf-8'), data[1]) #przesłanie informacji do klienta o zajmowanym przez niego porcie komunikacyjnym
-        print("New client", self.IP_address, "-", self.next_port)
-        self.acepted_cb(data[1][0], data[1][1])
+    def _send_message(self, code, channel, sender_data):
+        message = Signal()
+        message.code = bytes(code, encoding= 'utf-8')
+        message.two_byte = channel
+        self.sock.sendto(message.get_message(), sender_data)
+
+    def _con_signal(self, data_signal, sender_data):
+        if self.channels.get_count_of_active_user(data_signal.two_byte()) <= 5:
+            self.channels.add_user_to_channel(data_signal.two_byte(), sender_data[0], sender_data[1])
+            self._send_message("ACC", None, sender_data)
+        else:
+            self._send_message("DEN", None, sender_data)
+
+    def _png_signal(self, data_signal, sender_data):
+        self._send_message("PGR", None, sender_data)
+
+    def _pas_signal(self, data_signal, sender_data):
+        if data_signal.two_byte() == 0:
+            if data_signal.rest() == self.channels.channels[0]['password']:
+                self.channels.add_user_to_channel(data_signal.two_byte(), sender_data[0], sender_data[1])
+                self._send_message("ACC", None, sender_data)
+            else:
+                self._send_message("DEN", None, sender_data)
+        else:
+            self._con_signal(data_signal, sender_data)
+        
+    def _xxx_signal(self, data_signal, sender_data):
+        self.channels.del_user_from_channel(data_signal.two_byte(), sender_data[0], sender_data[1])
+        pass
+
+    def _read_signal(self, data):
+
+        sender_data = data[1] # do przetestowania !
+        data_signal = Signal(data[0])
+        if data_signal.code == b"CON":
+            self._con_signal(data_signal, sender_data)
+            pass
+        if data_signal.code == b"PNG":
+            self._png_signal(data_signal, sender_data)
+            pass
+        if data_signal.code == b"PAS":
+            self._pas_signal(data_signal, sender_data)
+            pass
+        if data_signal.code == b"XXX":
+            self._xxx_signal(data_signal, sender_data)
+            pass
+        else:
+            raise ConnectionError("Klient sent invalid signal")
+
+        self.port = int.from_bytes(data_signal.two_byte, "big")
+        return True
+
+    def test_add(self):
+        self.channels.add_user_to_channel(1, "127.0.0.1", 50010)
+        self.channels.add_user_to_channel(1, "127.0.0.1", 50011)
+        self.channels.add_user_to_channel(1, "127.0.0.1", 50012)
+        print(self.channels.get_list_users_on_chanel(1))
+        self.channels.del_user_from_channel(1, "127.0.0.1", 50011)
+        print(self.channels.get_list_users_on_chanel(1))
 
     def listen(self):
         print("listen method - ON\n")
+
         while True:
             data = self.sock.recvfrom(32) #buffer size is 1024 bytes 0 - data, 1 IP [0] / PORT [1] 
             print("received message: %s" % data[0])
-            if(str(data[0][0:3], "UTF-8") == "CON"): #żądanie rozpoczącia połączenia
-                self.create_client_thread(data)
-            else:
-                print("Wrong signal from new host  :(")
-            
-            #MESSAGE = b"PONG"
-            #self.sock.sendto(b"hejka", (data[1][0], data[1][1]))
-
+            self._read_signal(data)
 
 
 
 class Server:
-    def __init__(self, ip_address, ip_port, channel_0_pass):
+    def __init__(self, ip_address, ip_port, channel_0_pass, number_of_channels):
         def acepted_cb(client_address, client_port):
             print("Client connected! :)")
 
         self.main_ip_port = ip_port
         self.main_ip_address = ip_address
 
-        self.channels = {
-            0:{
-                "port":MIN_PORT,
-                "password":channel_0_pass,
-                "connected_users":[]   
-            }
-        }
-        for num in range(1,10):
-            self.create_channel(num)
-
-        self.client_manager = ClientManager(self.main_ip_address, self.main_ip_port, acepted_cb)
-
-    def create_channel(self, channel_num):
-        if channel_num not in self.channels:
-            self.channels[channel_num] = {
-                "port":self.get_port_num(),
-                "password":None,
-                "connected_users":[]
-            }
-
-    def get_port_num(self):
-        port = randint(PORT_MIN, PORT_MAX)
-        while self.used(port)
-            port = randint(PORT_MIN, PORT_MAX)
-        
-        return port
-
-    def used(self, port):
-        if port == self.main_ip_port:
-            return True
-
-        for channel in self.channels:
-            if channel.port == port:
-                return True
-        
-        return False
-
+        self.channels = Channels(channel_0_pass, number_of_channels, self.main_ip_port, self.main_ip_address)
+        self.client_manager = ClientManager(self.main_ip_address, self.main_ip_port, acepted_cb, self.channels)
 
     def run(self):
-        
-    
-
+        self.client_manager.listen()
+        pass
