@@ -1,5 +1,6 @@
 import socket
 
+
 class client:
     def __init__(self, IP_address, IP_port):
         self.IP_address = IP_address

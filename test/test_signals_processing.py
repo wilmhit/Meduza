@@ -1,5 +1,7 @@
-from signal_processing import Signal
 import unittest
+
+from signal_processing import Signal
+
 
 class TestSignalProcessing(unittest.TestCase):
     def setUp(self):

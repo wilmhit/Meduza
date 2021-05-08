@@ -1,27 +1,48 @@
-from .channels import ConnectionManager
-from .voip import VoipClient
-from threading import Thread
 import time
+from threading import Thread
+from typing import Dict, Optional, Tuple, Any
 
-SERVER_ADDRESS = "127.0.0.1"
-METADATA_PORT = 50001
+from .channels import ConnectionManager
+from .gui_callbacks import gui_state as shared_vars
+from .voip import VoipClient
 
-thread_variables = {
-    "break_condition": True
-}
+UPDATE_INTERVAL = 1
 
-def connect():
-    connection = ConnectionManager(SERVER_ADDRESS, METADATA_PORT)
-    #connection.check_sever()
-    if True: #connection.connect_channel(1): 
-        connection.port = 1515
-        voip_client = VoipClient(SERVER_ADDRESS, connection.port)
-        timeout_thread = Thread(target=change_timeout)
-        timeout_thread.start()
-        voip_client.loop_while(thread_variables)
-        timeout_thread.join()
+class ConnectionManager():
+    def __init__(self, shared_vars: Dict[str, Any]):
+        self.shared_vars = shared_vars
 
-def change_timeout():
-    time.sleep(5)
-    thread_variables["break_condition"] = not thread_variables["break_condition"]
-    print("condition changed")
+    def get_connected_channel(self) -> Optional[int]:
+        for channels in enumerate(self.shared_vars["channels"]):
+            pass
+            # TODO if connected return id
+        return None
+
+    def read_server_address(self) -> Tuple[str, int]:
+        # TODO Return whatever is in shared_vars["server_ip"]
+        return "127.0.0.1", 50001
+
+    def watch_channels(self):
+        connected_channel = self.get_connected_channel()
+        if get_connected_channel() is not None:
+            print("Connecting to channel")
+            self.connection.connect_channel(connected_channel)
+            voip_client = VoipClient(self.server_ip_tuple[0], connection.port)
+            voip_client.loop_while(shared_vars)
+
+    def connect(self):
+        print("Trying to connect to provided IP")
+        self.server_ip_tuple = self.read_server_address()
+        self.connection = ConnectionManager(*server_ip_tuple)
+        self.shared_vars["connected"] = connection.check_sever()
+        while self.shared_vars["connected"]:
+            self.watch_channels()
+            print("Watching for channels")
+        time.sleep(UPDATE_INTERVAL)
+
+    def main_loop(self):
+        while True: # TODO while window is not destroyed
+            if self.shared_vars["server_ip"] != "":
+                self.connect()
+            print("Waiting for server IP")
+            time.sleep(UPDATE_INTERVAL)

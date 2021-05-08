@@ -1,5 +1,7 @@
 import socket
+
 from signal_processing import Signal
+
 
 class ConnetionError(BaseException):
     """Cannot connect to server"""

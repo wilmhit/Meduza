@@ -1,4 +1,5 @@
 from gi.repository import Gtk
+
 from . import gui_callbacks
 from .gui_callbacks import gui_state
 

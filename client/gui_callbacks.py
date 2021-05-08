@@ -5,10 +5,12 @@ S_BETWEEN_CLICKS = 0.005
 CHANNELS = 5
 
 gui_state = {
-    "muted_mic": False,
-    "muted_spk": False,
+    "mic_muted": False,
+    "spk_muted": False,
     "last_click": 0.0,
     "connected": False,
+    "server_ip": "",
+    "channel_connected": False,
     "channels": []
 }
 

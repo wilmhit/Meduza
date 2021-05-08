@@ -1,6 +1,8 @@
 import socket
 from threading import Thread
+
 from signal_processing import Signal
+
 from .channels import Channels
 
 

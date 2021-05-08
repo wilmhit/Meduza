@@ -1,6 +1,7 @@
-import pyaudio
-import socket
 import select
+import socket
+
+import pyaudio
 
 FORMAT = pyaudio.paInt16
 CHANNELS = 1

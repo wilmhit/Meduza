@@ -1,7 +1,7 @@
-from time import sleep
 import socket
 import sys
 from threading import Thread
+from time import sleep
 
 CHUNK = 4096
 SERVER_ADDRESS = ('127.0.0.1', 10000)
