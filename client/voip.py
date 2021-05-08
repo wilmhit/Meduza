@@ -6,7 +6,7 @@ class VoipClient:
         self.server_port = server_port
     
     def loop_while(self, variable_set):
-        while (variable_set["break_conditio"]):
+        while (variable_set["break_condition"]):
             print("looping")
             time.sleep(0.5)
         print("loop was broken")
