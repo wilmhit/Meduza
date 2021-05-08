@@ -10,6 +10,8 @@ class SingleChannel(Thread):
         self.IP_port = IP_port
         self.set_up_sock()
 
+        self._running = False
+
     def set_up_sock(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((self.IP_address, self.IP_port))
@@ -17,20 +19,18 @@ class SingleChannel(Thread):
     def run(self):
         print("runing thread number: ", self.number_of_channel)
 
-        while True:
+        while self._running:
             print("i'm a thread! :) nubmer: ", self.number_of_channel)
-            time.sleep(1.5)
+            # TO DO -> nasłuchiwanie na sokocie oraz obsługa / przekazywanie do pozostałych
+            time.sleep(1)
+        
+        print("ups - I'm a dead thread")
 
+    def setUp_start_stop_value(self, empty):
+        if empty:
+            self._running = True
+        else:
+            self._running = False
 
-    def if_empty(self):
-        pass
-
-    def listen_loop(self):
-        pass
-
-    def start_thread(self):
-        pass
-
-    def stop_thread(self):
-        pass
+        print("running: ", self._running)
 

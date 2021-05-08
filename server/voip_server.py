@@ -2,7 +2,7 @@ import socket
 from threading import Thread
 from signal_processing import Signal
 from .channels import Channels
-
+import time
 
 
 class ClientManager:
@@ -65,18 +65,21 @@ class ClientManager:
         self.channels.add_user_to_channel(1, "127.0.0.1", 50010)
         self.channels.add_user_to_channel(2, "127.0.0.1", 50011)
         self.channels.add_user_to_channel(4, "127.0.0.1", 50012)
+        time.sleep(3)
         print(self.channels.get_list_users_on_chanel(1))
         self.channels.del_user_from_channel(2, "127.0.0.1", 50011)
         print(self.channels.get_list_users_on_chanel(1))
+        time.sleep(3)
+        self.channels.add_user_to_channel(2, "127.0.0.1", 50011)
 
     def listen(self):
         print("listen method - ON\n")
 
         self.test_add()
-        while True:
-            data = self.sock.recvfrom(32) #buffer size is 1024 bytes 0 - data, 1 IP [0] / PORT [1] 
-            print("received message: %s" % data[0])
-            self._read_signal(data)
+        #while True:
+        #    data = self.sock.recvfrom(32) #buffer size is 1024 bytes 0 - data, 1 IP [0] / PORT [1] 
+        #    print("received message: %s" % data[0])
+        #    self._read_signal(data)
 
 
 

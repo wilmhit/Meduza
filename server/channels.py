@@ -16,7 +16,7 @@ class Channels:
                 "port": PORT_MIN,
                 "password": channel_0_pass,
                 "connected_users":[],
-                "thread": SingleChannel(0, self.main_ip_address, PORT_MIN)
+                "thread": None
             }
         }
 
@@ -34,7 +34,7 @@ class Channels:
                 "port":channnel_port,
                 "password":None,
                 "connected_users":[],
-                "thread": SingleChannel(channel_num, self.main_ip_address, channnel_port)
+                "thread": None
             }
 
     def get_port_num(self):
@@ -57,6 +57,8 @@ class Channels:
     def add_user_to_channel(self, channel_number, userIP, userPort):
 
         if not self.channels[channel_number]['connected_users']:
+            self.channels[channel_number]['thread'] = SingleChannel(channel_number, self.main_ip_address, self.channels[channel_number]['port'])
+            self.channels[channel_number]['thread'].setUp_start_stop_value(True)
             self.channels[channel_number]['thread'].start()
 
         user = (userIP, userPort) 
@@ -64,6 +66,9 @@ class Channels:
 
     def del_user_from_channel(self, channel_number, userIP, userPort):
 
+        if self.channels[channel_number]['connected_users']:
+            self.channels[channel_number]['thread'].setUp_start_stop_value(False)
+            self.channels[channel_number]['thread'] = None
 
         user = (userIP, userPort)
         self.channels[channel_number]['connected_users'].remove(user)
