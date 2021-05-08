@@ -9,14 +9,12 @@ class PasswordError(BaseException):
     """Channel is secured with password"""
     pass
 
-def connect():
-    connection = ConnectionManager("127.0.0.1", 50001)
-    connection.connect_channel(1)
-
 class ConnectionManager():
     def __init__(self, server_address: str, server_port: int):
         self.server_address = (server_address, server_port)
         self.metadata_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    def check_server(self):
         if not self.ping():
             raise ConnetionError()
 

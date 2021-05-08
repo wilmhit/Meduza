@@ -7,26 +7,26 @@ class Signal:
             self.load_message(message)
 
     def load_message(self, message: bytes):
-        self.code = message[:2]
-        self.two_byte = message[2:4]
-        self.rest = message[4:]
+        self.code = message[:3]
+        self.two_byte = message[3:5]
+        self.rest = message[5:32]
 
     def get_message(self) -> bytes:
         self.parse_code()
         self.parse_bytes()
         self.parse_rest()
         return self.code + self.two_byte + self.rest
- 
+    
     def parse_rest(self):
         if self.rest is None:
             self.rest = int(0).to_bytes(27, "big")
-        if len(self.rest) == 27:
+        if len(self.rest) != 27:
             raise TypeError("Fill is not 27 bytes")
 
     def parse_bytes(self):
         if self.two_byte is None:
             self.two_byte = 0
-        if type(self.two_byte) != int or type(self.two_byte) != bytes:
+        if type(self.two_byte) != int and type(self.two_byte) != bytes:
             raise TypeError("Second field is not of valid type")
         if type(self.two_byte) == int:
             self.two_byte = self.two_byte.to_bytes(2, byteorder="big")
@@ -36,8 +36,10 @@ class Signal:
             raise AttributeError("Second field does not have 2 bytes")
 
     def parse_code(self):
-        if type(self.code) != str or type(self.code) != bytes:
-            raise TypeError("Code field is not of valid type")
+        if type(self.code) != str and type(self.code) != bytes:
+            raise TypeError(
+                f"Code field is not of valid type: {type(self.code)}"
+            )
         if type(self.code) == "str":
             self.code = self.code.encode("uft8")
 
