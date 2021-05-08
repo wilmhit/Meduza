@@ -40,3 +40,4 @@ class Signal:
             raise TypeError("Code field is not of valid type")
         if type(self.code) == "str":
             self.code = self.code.encode("uft8")
+
