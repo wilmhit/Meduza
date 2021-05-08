@@ -1,17 +1,17 @@
+from typing import Union
 
 class Signal:
-    def __init__(self, message=None):
+    def __init__(self, message: Union[bytes, None] =None):
+        self.code, self.two_byte, self.rest = None, None, None
         if message is not None:
             self.load_message(message)
-        else:
-            self.code, self.two_byte, self.rest = None, None, None
 
-    def load_message(self, message):
+    def load_message(self, message: bytes):
         self.code = message[:2]
         self.two_byte = message[2:4]
         self.rest = message[4:]
 
-    def get_message(self):
+    def get_message(self) -> bytes:
         self.parse_code()
         self.parse_bytes()
         self.parse_rest()
