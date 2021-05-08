@@ -6,12 +6,12 @@ class Signal:
         else:
             self.code, self.two_byte, self.rest = None, None, None
 
-    def load_message(self, message):
-        self.code = message[:2]
-        self.two_byte = message[2:4]
-        self.rest = message[4:]
+    def load_message(self, message: bytes):
+        self.code = message[:3]
+        self.two_byte = message[3:5]
+        self.rest = message[5:32]
 
-    def get_message(self):
+    def get_message(self) -> bytes:
         self.parse_code()
         self.parse_bytes()
         self.parse_rest()
