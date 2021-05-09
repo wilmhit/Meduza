@@ -41,7 +41,7 @@ class ConnectionManager():
         time.sleep(UPDATE_INTERVAL)
 
     def main_loop(self):
-        while True: # TODO while window is not destroyed
+        while self.shared_vars["is_running"]:
             if self.shared_vars["server_ip"] != "":
                 self.connect()
             print("Waiting for server IP")

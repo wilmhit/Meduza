@@ -11,12 +11,12 @@ class VoipClient:
     def loop_while(self, shared_vars: Dict[str, Any]):
         while (variable_set["channel_connected"]):
 
-            if variable_set["mic_muted"]:
+            if variable_set["mute_mic"]:
                 self.send_dummy_audio()
             else:
                 self.send_audio()
 
-            if variable_set["spk_muted"]:
+            if variable_set["mute_spk"]:
                 self.receive_dummy_audio()
             else:
                 self.receive_audio()
