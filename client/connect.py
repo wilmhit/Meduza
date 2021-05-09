@@ -1,12 +1,13 @@
 import time
 from threading import Thread
-from typing import Dict, Optional, Tuple, Any
+from typing import Any, Dict, Optional, Tuple
 
 from .channels import ChannelManager
 from .gui_callbacks import gui_state as shared_vars
 from .voip import VoipClient
 
 UPDATE_INTERVAL = 1
+
 
 class ConnectionManager():
     def __init__(self, shared_vars: Dict[str, Any]):
@@ -27,7 +28,7 @@ class ConnectionManager():
         if self.get_connected_channel() is not None:
             print("Connecting to channel")
             # self.connection.connect_channel(connected_channel) TODO fix
-            self.connection.port = 1515 # TODO Delete once ChannelManager is fixed
+            self.connection.port = 1515  # TODO Delete once ChannelManager is fixed
             # TODO handle channel denied
             voip_client = \
                 VoipClient(self.server_ip_tuple[0], self.connection.port)
@@ -37,7 +38,8 @@ class ConnectionManager():
         print("Trying to connect to provided IP")
         self.server_ip_tuple = self.read_server_address()
         self.connection = ChannelManager(*self.server_ip_tuple)
-        self.shared_vars["connection_validated"] = True #self.connection.check_server()
+        self.shared_vars[
+            "connection_validated"] = True  #self.connection.check_server()
         while self.shared_vars["connection_validated"]:
             self.watch_channels()
             print("Watching for channels")

@@ -1,10 +1,11 @@
-from gi.repository import Gtk, GLib
+from gi.repository import GLib, Gtk
 
 from . import gui_callbacks
 from .gui_callbacks import gui_state
 
 MAX_PASSWORD_LEN = 10
 MAX_SERVER_ADDRESS = 1000
+
 
 class MainWindow(Gtk.ApplicationWindow):
     def __init__(self):
@@ -20,6 +21,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def show_dialog(self, _):
         PasswordModal(self).run()
+
 
 class MainHeaderBar(Gtk.HeaderBar):
     def __init__(self, parent):
@@ -48,6 +50,7 @@ class MainHeaderBar(Gtk.HeaderBar):
         if self.get_connect_label() != self.disconnect_button.get_label():
             self.disconnect_button.set_label(self.get_connect_label())
         return True
+
 
 class MainContent(Gtk.Grid):
     def __init__(self, parent):
@@ -83,9 +86,9 @@ class MainContent(Gtk.Grid):
 
         # Row Column Width Height        R  C  W  H
         self.attach(framed_channel_list, 0, 0, 1, 4)
-        self.attach(mute_all_checkbox,   1, 0, 1, 1)
-        self.attach(mute_mic_checkbox,   1, 1, 1, 1)
-        self.attach(boom_button,         1, 2, 1, 1)
+        self.attach(mute_all_checkbox, 1, 0, 1, 1)
+        self.attach(mute_mic_checkbox, 1, 1, 1, 1)
+        self.attach(boom_button, 1, 2, 1, 1)
 
     def create_channel_list(self):
         return [
@@ -97,7 +100,7 @@ class MainContent(Gtk.Grid):
         for channel_id, channel in enumerate(self.channels):
             state = gui_callbacks.is_channel_connected(channel_id)
             self.set_channel_active(channel, state)
-    
+
     def set_channel_active(self, channel, state):
         checkbox = channel[1]
         if checkbox.get_active() != state:
@@ -120,7 +123,7 @@ class MainContent(Gtk.Grid):
         box.pack_start(checkbox, True, True, 0)
         row.add(box)
         return row, checkbox
-    
+
     def channel_click(self, channel_id):
         if not gui_callbacks.time_lock() or not gui_callbacks.is_connected():
             return
@@ -162,6 +165,7 @@ class PasswordModal(Gtk.Dialog):
         else:
             gui_callbacks.time_lock()
         dialog.destroy()
+
 
 class ServerModal(Gtk.Dialog):
     def __init__(self, parent):

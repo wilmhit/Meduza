@@ -9,4 +9,4 @@ from .views import MainWindow, PasswordModal
 def run_gui():
     window = MainWindow()
     window.show_all()
-    Gtk.main() # this is blocking
+    Gtk.main()  # this is blocking

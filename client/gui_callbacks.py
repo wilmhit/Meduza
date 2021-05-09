@@ -20,12 +20,12 @@ gui_state = {
     # channel_connected is unnecessary (in theory), since one can get this
     # information by iteration through channels, but reading bool is faster
     # and this value is read very often
-    "channel_connected": False, 
+    "channel_connected": False,
     "channels": []
 }
 
-
 # Creating channels
+
 
 def create_channel(id: int) -> Dict[str, Union[str, bool]]:
     return {"display": "Channel " + str(id), "connected": False}
@@ -34,8 +34,8 @@ def create_channel(id: int) -> Dict[str, Union[str, bool]]:
 for x in range(CHANNELS):
     gui_state["channels"].append(create_channel(x))
 
-
 # Gui callbacks
+
 
 def destroy():
     gui_state["is_running"] = False
@@ -79,6 +79,7 @@ def time_lock() -> bool:
     # difference is negative for first click
     return time_passed > S_BETWEEN_CLICKS or time_passed < 0
 
+
 def connect_channel(channel_id: int):
     for channel in gui_state["channels"]:
         channel["connected"] = False
@@ -96,7 +97,7 @@ def is_protected_channel(channel_id: int):
 
 
 def boom_callback(_):
-    print("boom") # TODO
+    print("boom")  # TODO
 
 
 def mute_mic(_):

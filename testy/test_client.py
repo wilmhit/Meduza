@@ -9,15 +9,18 @@ SERVER_ADDRESS = ('127.0.0.1', 10000)
 soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 soc.bind(('127.0.0.1', 9999))
 
+
 def receive_thread():
     while True:
         data, addr = soc.recvfrom(CHUNK)
         print(addr, " sends message: ", data)
 
+
 def send_thread():
     while True:
         sleep(1)
         soc.sendto(b'Hello World', SERVER_ADDRESS)
+
 
 def main():
     print('Staring Threads...')
@@ -29,6 +32,7 @@ def main():
     listner.join()
     sender.join()
     print('Shutting down...')
+
 
 if __name__ == '__main__':
     main()

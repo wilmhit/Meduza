@@ -7,7 +7,7 @@ class VoipClient:
         self.server_ip = server_ip
         self.server_port = server_port
         # TODO here create audio streams
-    
+
     def loop_while(self, shared_vars: Dict[str, Any]):
         while (shared_vars["channel_connected"]):
 
@@ -30,6 +30,6 @@ class VoipClient:
 
     def receive_dummy_audio(self):
         pass
-    
+
     def receive_audio(self):
         pass

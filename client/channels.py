@@ -7,9 +7,11 @@ class ConnetionError(BaseException):
     """Cannot connect to server"""
     pass
 
+
 class PasswordError(BaseException):
     """Channel is secured with password"""
     pass
+
 
 class ChannelManager():
     def __init__(self, server_address: str, server_port: int):
@@ -20,7 +22,7 @@ class ChannelManager():
         if not self.ping():
             raise ConnetionError()
 
-    def ping(self) -> bool: # TODO This does not work
+    def ping(self) -> bool:  # TODO This does not work
         message = Signal()
         message.code = b"PNG"
 
@@ -64,10 +66,14 @@ class ChannelManager():
         response, _ = self.metadata_socket.recvfrom(32)
         return self._read_channel_connection_response(response)
 
-    def connect_channel(self, channel: int, password=None) -> bool: # TODO this does not work either
+    def connect_channel(
+            self,
+            channel: int,
+            password=None) -> bool:  # TODO this does not work either
         if password is not None:
             return self._connect_securely(channel, password)
         return self._connect_channel(channel)
 
+
 def hash_pw(password: bytes) -> bytes:
-    return b"x" * 27 # TODO
+    return b"x" * 27  # TODO
