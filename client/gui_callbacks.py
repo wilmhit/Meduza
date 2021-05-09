@@ -79,7 +79,6 @@ def time_lock() -> bool:
     # difference is negative for first click
     return time_passed > S_BETWEEN_CLICKS or time_passed < 0
 
-
 def connect_channel(channel_id: int):
     for channel in gui_state["channels"]:
         channel["connected"] = False

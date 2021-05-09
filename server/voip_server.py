@@ -5,7 +5,6 @@ from signal_processing import Signal
 
 from .channels import Channels
 
-
 class ClientManager:
 
     def __init__(self, IP_address, IP_port, acepted_cb, channels):
