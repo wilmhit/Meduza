@@ -11,7 +11,7 @@ class PasswordError(BaseException):
     """Channel is secured with password"""
     pass
 
-class ConnectionManager():
+class ChannelManager():
     def __init__(self, server_address: str, server_port: int):
         self.server_address = (server_address, server_port)
         self.metadata_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -20,7 +20,7 @@ class ConnectionManager():
         if not self.ping():
             raise ConnetionError()
 
-    def ping(self) -> bool:
+    def ping(self) -> bool: # TODO This does not work
         message = Signal()
         message.code = b"PNG"
 
@@ -31,7 +31,7 @@ class ConnectionManager():
         return returned.code == b"PGR"
 
     def _send_connect_message(self, channel: int):
-        message = Singal()
+        message = Signal()
         message.code = b"CON"
         message.two_byte = channel
         self.metadata_socket.sendto(message.get_message(), self.server_address)
@@ -64,7 +64,7 @@ class ConnectionManager():
         response, _ = self.metadata_socket.recvfrom(32)
         return self._read_channel_connection_response(response)
 
-    def connect_channel(self, channel: int, password=None) -> bool:
+    def connect_channel(self, channel: int, password=None) -> bool: # TODO this does not work either
         if password is not None:
             return self._connect_securely(channel, password)
         return self._connect_channel(channel)

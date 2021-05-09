@@ -1,4 +1,4 @@
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 from . import gui_callbacks
 from .gui_callbacks import gui_state
@@ -9,10 +9,14 @@ MAX_SERVER_ADDRESS = 1000
 class MainWindow(Gtk.ApplicationWindow):
     def __init__(self):
         Gtk.ApplicationWindow.__init__(self)
-        self.connect("destroy", Gtk.main_quit)
+        self.connect("destroy", self.destroy)
         self.set_border_width(20)
         self.set_titlebar(MainHeaderBar(self))
         self.add(MainContent(self))
+
+    def destroy(self, *args, **kwargs):
+        gui_callbacks.destroy()
+        Gtk.main_quit(*args, **kwargs)
 
     def show_dialog(self, _):
         PasswordModal(self).run()
@@ -23,9 +27,10 @@ class MainHeaderBar(Gtk.HeaderBar):
         Gtk.HeaderBar.__init__(self, title="Meduza 007")
         self.set_show_close_button(True)
 
-        disconnect_button = Gtk.Button(label=self.get_connect_label())
-        disconnect_button.connect("clicked", self.connect)
-        self.pack_start(disconnect_button)
+        self.disconnect_button = Gtk.Button(label=self.get_connect_label())
+        self.disconnect_button.connect("clicked", self.connect)
+        self.pack_start(self.disconnect_button)
+        self.timeout_id = GLib.timeout_add(500, self.on_timeout, None)
 
     def get_connect_label(self):
         if gui_callbacks.is_connected():
@@ -38,6 +43,11 @@ class MainHeaderBar(Gtk.HeaderBar):
         else:
             gui_callbacks.disconnect()
         button.set_label(self.get_connect_label())
+
+    def on_timeout(self, _):
+        if self.get_connect_label() != self.disconnect_button.get_label():
+            self.disconnect_button.set_label(self.get_connect_label())
+        return True
 
 class MainContent(Gtk.Grid):
     def __init__(self, parent):
@@ -102,11 +112,7 @@ class MainContent(Gtk.Grid):
         checkbox = Gtk.CheckButton(label=channel["display"])
 
         def checkbox_callback(channel_id):
-            if gui_callbacks.time_lock() and gui_callbacks.is_connected():
-                if gui_callbacks.is_protected_channel(channel_id):
-                    PasswordModal(self.parent).run()
-                else:
-                    gui_callbacks.connect_channel(channel_id)
+            self.channel_click(channel_id)
             self.set_connected_channels()
 
         checkbox.connect("clicked", lambda _: checkbox_callback(channel_id))
@@ -114,6 +120,18 @@ class MainContent(Gtk.Grid):
         box.pack_start(checkbox, True, True, 0)
         row.add(box)
         return row, checkbox
+    
+    def channel_click(self, channel_id):
+        if not gui_callbacks.time_lock() or not gui_callbacks.is_connected():
+            return
+        if gui_callbacks.is_channel_connected(channel_id):
+            return gui_callbacks.disconnect_channel()
+
+        if gui_callbacks.is_protected_channel(channel_id):
+            PasswordModal(self.parent).run()
+        else:
+            gui_callbacks.connect_channel(channel_id)
+
 
 class PasswordModal(Gtk.Dialog):
     def __init__(self, parent):

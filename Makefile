@@ -1,9 +1,9 @@
 
-client:
+run-client:
 	python client.py
 
-server:
+run-server:
 	python server.py
 
-tests:
+run-tests:
 	python -m unittest discover -v -s "./test" -p "test_*.py"

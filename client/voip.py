@@ -9,18 +9,17 @@ class VoipClient:
         # TODO here create audio streams
     
     def loop_while(self, shared_vars: Dict[str, Any]):
-        while (variable_set["channel_connected"]):
+        while (shared_vars["channel_connected"]):
 
-            if variable_set["mute_mic"]:
+            if shared_vars["mute_mic"]:
                 self.send_dummy_audio()
             else:
                 self.send_audio()
 
-            if variable_set["mute_spk"]:
+            if shared_vars["mute_spk"]:
                 self.receive_dummy_audio()
             else:
                 self.receive_audio()
-            
 
     # Use audio streams in methods below
     def send_audio(self):

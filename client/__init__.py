@@ -6,8 +6,13 @@ from .gui_callbacks import gui_state
 
 
 def main():
-    ui_thread = Thread(target=run_gui)
-    ui_thread.start()
     connection_manager = ConnectionManager(gui_state)
-    connection_manager.main_loop()
+
+    ui_thread = Thread(target=run_gui)
+    connection_thread = Thread(target=connection_manager.main_loop)
+
+    ui_thread.start()
+    connection_thread.start()
+
     ui_thread.join()
+    connection_thread.join()

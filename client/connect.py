@@ -2,7 +2,7 @@ import time
 from threading import Thread
 from typing import Dict, Optional, Tuple, Any
 
-from .channels import ConnectionManager
+from .channels import ChannelManager
 from .gui_callbacks import gui_state as shared_vars
 from .voip import VoipClient
 
@@ -13,9 +13,9 @@ class ConnectionManager():
         self.shared_vars = shared_vars
 
     def get_connected_channel(self) -> Optional[int]:
-        for channels in enumerate(self.shared_vars["channels"]):
-            pass
-            # TODO if connected return id
+        for channel_id, channel in enumerate(self.shared_vars["channels"]):
+            if channel["connected"] == True:
+                return channel_id
         return None
 
     def read_server_address(self) -> Tuple[str, int]:
@@ -24,21 +24,24 @@ class ConnectionManager():
 
     def watch_channels(self):
         connected_channel = self.get_connected_channel()
-        if get_connected_channel() is not None:
+        if self.get_connected_channel() is not None:
             print("Connecting to channel")
-            self.connection.connect_channel(connected_channel)
-            voip_client = VoipClient(self.server_ip_tuple[0], connection.port)
+            # self.connection.connect_channel(connected_channel) TODO fix
+            self.connection.port = 1515 # TODO Delete once ChannelManager is fixed
+            # TODO handle channel denied
+            voip_client = \
+                VoipClient(self.server_ip_tuple[0], self.connection.port)
             voip_client.loop_while(shared_vars)
 
     def connect(self):
         print("Trying to connect to provided IP")
         self.server_ip_tuple = self.read_server_address()
-        self.connection = ConnectionManager(*server_ip_tuple)
-        self.shared_vars["connected"] = connection.check_sever()
-        while self.shared_vars["connected"]:
+        self.connection = ChannelManager(*self.server_ip_tuple)
+        self.shared_vars["connection_validated"] = True #self.connection.check_server()
+        while self.shared_vars["connection_validated"]:
             self.watch_channels()
             print("Watching for channels")
-        time.sleep(UPDATE_INTERVAL)
+            time.sleep(UPDATE_INTERVAL)
 
     def main_loop(self):
         while self.shared_vars["is_running"]:

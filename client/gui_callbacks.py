@@ -14,10 +14,13 @@ gui_state = {
     "mute_mic": False,
     "mute_spk": False,
     "last_click": 0.0,
-    "connected": False, # TODO rename to connection_validated
+    "connection_validated": False,
     "password": "",
     "server_ip": "",
-    "channel_connected": False, # TODO remove this
+    # channel_connected is unnecessary (in theory), since one can get this
+    # information by iteration through channels, but reading bool is faster
+    # and this value is read very often
+    "channel_connected": False, 
     "channels": []
 }
 
@@ -36,9 +39,7 @@ for x in range(CHANNELS):
 
 def destroy():
     gui_state["is_running"] = False
-    gui_state["server_ip"] = ""
-    gui_state["connected"] = False
-    gui_state["channel_connected"] = False
+    disconnect()
 
 
 def is_channel_connected(channel_id: int):
@@ -53,15 +54,21 @@ def is_connected_to_any_channel() -> bool:
 
 
 def is_connected() -> bool:
-    return gui_state["connected"]
+    return gui_state["connection_validated"]
 
 
 def disconnect():
-    gui_state["connected"] = False
+    gui_state["connection_validated"] = False
     gui_state["server_ip"] = ""
     gui_state["channel_connected"] = False
     for channel in gui_state["channels"]:
         channel["connected"] = False
+
+
+def disconnect_channel():
+    for channel in gui_state["channels"]:
+        channel["connected"] = False
+    gui_state["channel_connected"] = False
 
 
 def time_lock() -> bool:
@@ -89,7 +96,7 @@ def is_protected_channel(channel_id: int):
     return channel_id == 0
 
 
-def boom_callback():
+def boom_callback(_):
     print("boom") # TODO
 
 
