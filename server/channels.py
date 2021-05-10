@@ -29,9 +29,8 @@ class Channels:
 
     def create_channel(self, channel_num):
         if channel_num not in self.channels:
-            channnel_port = self.get_port_num()
             self.channels[channel_num] = {
-                "port":channnel_port,
+                "port":self.get_port_num(),
                 "password":None,
                 "connected_users":[],
                 "thread": None
@@ -58,7 +57,7 @@ class Channels:
 
         if not self.channels[channel_number]['connected_users']:
             self.channels[channel_number]['thread'] = SingleChannel(channel_number, self.main_ip_address, self.channels[channel_number]['port'])
-            self.channels[channel_number]['thread'].setUp_start_stop_value(True)
+            self.channels[channel_number]['thread'].set_start_value()
             self.channels[channel_number]['thread'].start()
 
         user = (userIP, userPort) 
@@ -67,7 +66,7 @@ class Channels:
     def del_user_from_channel(self, channel_number, userIP, userPort):
 
         if self.channels[channel_number]['connected_users']:
-            self.channels[channel_number]['thread'].setUp_start_stop_value(False)
+            self.channels[channel_number]['thread'].set_stop_value()
             self.channels[channel_number]['thread'] = None
 
         user = (userIP, userPort)
@@ -78,6 +77,3 @@ class Channels:
 
     def get_list_users_on_chanel(self, channel_number):
         return self.channels[channel_number]['connected_users']
-
-
-    

@@ -81,8 +81,6 @@ class ClientManager:
         #    print("received message: %s" % data[0])
         #    self._read_signal(data)
 
-
-
 class Server:
     def __init__(self, ip_address, ip_port, channel_0_pass, number_of_channels):
         def acepted_cb(client_address, client_port):

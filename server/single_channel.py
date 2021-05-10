@@ -20,17 +20,16 @@ class SingleChannel(Thread):
         print("runing thread number: ", self.number_of_channel)
 
         while self._running:
-            print("i'm a thread! :) nubmer: ", self.number_of_channel)
+            print("I'm a thread! :) number: ", self.number_of_channel)
             # TO DO -> nasłuchiwanie na sokocie oraz obsługa / przekazywanie do pozostałych
             time.sleep(1)
         
         print("ups - I'm a dead thread")
 
-    def setUp_start_stop_value(self, empty):
-        if empty:
-            self._running = True
-        else:
-            self._running = False
-
+    def set_start_value(self):
+        self._running = True
         print("running: ", self._running)
 
+    def set_stop_value(self):
+        self._running = False
+        print("running: ", self._running)
