@@ -21,7 +21,6 @@ class BaseServer(abc.ABC):
         self._running = True
         self._server_thread = Thread(target=self._run)
         self._server_thread.start()
-
     
     def stop(self):
         self._running = False
