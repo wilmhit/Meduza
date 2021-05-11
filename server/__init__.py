@@ -2,7 +2,7 @@
 pass
 import socket
 from threading import Thread
-from .voip_server import Server
+from .voip_server import Server, ClientManager
 
 
 UDP_IP = "127.0.0.1"
@@ -18,3 +18,5 @@ def main():
 
 def mock_main():
     server = Server(UDP_IP, UDP_PORT, PASSWORD, NUM_OF_CHANNELS)
+    echo_server = 
+    Thread(target)
