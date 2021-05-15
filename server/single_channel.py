@@ -33,3 +33,4 @@ class SingleChannel(Thread):
     def set_stop_value(self):
         self._running = False
         print("running: ", self._running)
+        

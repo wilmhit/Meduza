@@ -11,14 +11,14 @@ class Channels:
         self.main_ip_port = ip_port
         self.main_ip_address = ip_address
         
-        self.channels = {
-            0:{
+        self.channels = [
+            {
                 "port": PORT_MIN,
                 "password": channel_0_pass,
                 "connected_users":[],
                 "thread": None
             }
-        }
+        ]
 
         for num in range(1, number_of_channels):
             self.create_channel(num)
@@ -29,12 +29,12 @@ class Channels:
 
     def create_channel(self, channel_num):
         if channel_num not in self.channels:
-            self.channels[channel_num] = {
+            self.channels.append({
                 "port":self.get_port_num(),
                 "password":None,
                 "connected_users":[],
                 "thread": None
-            }
+            })
 
     def get_port_num(self):
         port = randint(PORT_MIN, PORT_MAX)
@@ -47,8 +47,8 @@ class Channels:
         if port == self.main_ip_port:
             return True
 
-        for chan in self.channels.keys():
-            if self.channels[chan]['port'] == port:
+        for chan in self.channels:
+            if chan['port'] == port:
                 return True
 
         return False
@@ -77,3 +77,4 @@ class Channels:
 
     def get_list_users_on_chanel(self, channel_number):
         return self.channels[channel_number]['connected_users']
+        
