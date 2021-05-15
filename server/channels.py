@@ -4,10 +4,10 @@ from .single_channel import SingleChannel
 
 PORT_MIN = 50100
 PORT_MAX = PORT_MIN + 500
+NUMBER_OF_CHANNELS = 10
 
 class Channels:
-    def __init__(self, channel_0_pass, number_of_channels, ip_port, ip_address):
-
+    def __init__(self, channel_0_pass: str, ip_port: int, ip_address: str):
         self.main_ip_port = ip_port
         self.main_ip_address = ip_address
         
@@ -22,7 +22,7 @@ class Channels:
 
         for num in range(1, number_of_channels):
             self.create_channel(num)
-
+        
         print("channels dict has been created")
 
 

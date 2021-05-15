@@ -4,7 +4,6 @@ from signal_processing import Signal
 from .channels import Channels
 import time
 
-
 class ClientManager:
 
     def __init__(self, IP_address, IP_port, acepted_cb, channels):
@@ -74,7 +73,6 @@ class ClientManager:
 
     def listen(self):
         print("listen method - ON\n")
-
         self.test_add()
         #while True:
         #    data = self.sock.recvfrom(32) #buffer size is 1024 bytes 0 - data, 1 IP [0] / PORT [1] 
