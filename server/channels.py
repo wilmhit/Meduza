@@ -77,4 +77,3 @@ class Channels:
 
     def get_list_users_on_chanel(self, channel_number):
         return self.channels[channel_number]['connected_users']
-        
