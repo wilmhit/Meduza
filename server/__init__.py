@@ -14,4 +14,3 @@ def main():
     server.run()
     #rec_thr = Thread(target=Server.listen)
     #rec_thr.start()
-

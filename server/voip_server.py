@@ -1,10 +1,11 @@
 import socket
+import time
 from threading import Thread
 
 from signal_processing import Signal
 
 from .channels import Channels
-import time
+
 
 class ClientManager:
     def __init__(self, IP_address, IP_port, acepted_cb, channels):
@@ -45,7 +46,8 @@ class ClientManager:
             self._con_signal(data_signal, sender_data)
 
     def _xxx_signal(self, data_signal, sender_data):
-        self.channels.del_user_from_channel(data_signal.two_byte(), sender_data[0], sender_data[1])
+        self.channels.del_user_from_channel(data_signal.two_byte(),
+                                            sender_data[0], sender_data[1])
 
     def _read_signal(self, data):
 
@@ -79,9 +81,10 @@ class ClientManager:
         print("listen method - ON\n")
         self.test_add()
         #while True:
-        #    data = self.sock.recvfrom(32) #buffer size is 1024 bytes 0 - data, 1 IP [0] / PORT [1] 
+        #    data = self.sock.recvfrom(32) #buffer size is 1024 bytes 0 - data, 1 IP [0] / PORT [1]
         #    print("received message: %s" % data[0])
         #    self._read_signal(data)
+
 
 class Server:
     def __init__(self, ip_address, ip_port, channel_0_pass,
@@ -100,4 +103,3 @@ class Server:
 
     def run(self):
         self.client_manager.listen()
-        
