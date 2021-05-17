@@ -1,6 +1,7 @@
-import pyaudio
-import socket
 import select
+import socket
+
+import pyaudio
 
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
@@ -8,9 +9,12 @@ RATE = 44100
 CHUNK = 4096
 
 audio = pyaudio.PyAudio()
-serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # socket tryb streamowania
-serversocket.bind(('127.0.0.1', 4444)) # bindowanie socketu na adres i port 
-serversocket.listen(5) # maksymalna iość połączeń w kolejce do nasłuchiwania / nazwiązania kontaktu z gniazdem
+serversocket = socket.socket(socket.AF_INET,
+                             socket.SOCK_STREAM)  # socket tryb streamowania
+serversocket.bind(('127.0.0.1', 4444))  # bindowanie socketu na adres i port
+serversocket.listen(
+    5
+)  # maksymalna iość połączeń w kolejce do nasłuchiwania / nazwiązania kontaktu z gniazdem
 
 
 def callback(in_data, frame_count, time_info, status):
@@ -20,7 +24,12 @@ def callback(in_data, frame_count, time_info, status):
 
 
 # start Recording
-stream = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK, stream_callback=callback)
+stream = audio.open(format=FORMAT,
+                    channels=CHANNELS,
+                    rate=RATE,
+                    input=True,
+                    frames_per_buffer=CHUNK,
+                    stream_callback=callback)
 # stream.start_stream()
 
 read_list = [serversocket]
@@ -40,7 +49,6 @@ try:
                     read_list.remove(s)
 except KeyboardInterrupt:
     pass
-
 
 print("finished recording")
 
