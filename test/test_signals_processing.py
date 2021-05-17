@@ -1,5 +1,7 @@
-from signal_processing import Signal
 import unittest
+
+from signal_processing import Signal
+
 
 class TestSignalProcessing(unittest.TestCase):
     def setUp(self):
@@ -20,7 +22,7 @@ class TestSignalProcessing(unittest.TestCase):
 
     def test_parsing_message(self):
         message = Signal(self.message)
-        
+
         self.assertEqual(self.code, message.code)
         self.assertEqual(self.two_byte, message.two_byte)
         self.assertEqual(self.rest, message.rest)

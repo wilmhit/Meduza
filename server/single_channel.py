@@ -1,6 +1,7 @@
-from threading import Thread
-import time
 import socket
+import time
+from threading import Thread
+
 
 class SingleChannel(Thread):
     def __init__(self, number_of_channel, IP_address, IP_port):
@@ -23,7 +24,7 @@ class SingleChannel(Thread):
             print("I'm a thread! :) number: ", self.number_of_channel)
             # TO DO -> nasłuchiwanie na sokocie oraz obsługa / przekazywanie do pozostałych
             time.sleep(1)
-        
+
         print("ups - I'm a dead thread")
 
     def set_start_value(self):
@@ -33,4 +34,3 @@ class SingleChannel(Thread):
     def set_stop_value(self):
         self._running = False
         print("running: ", self._running)
-        
