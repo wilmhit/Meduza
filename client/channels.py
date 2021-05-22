@@ -1,6 +1,6 @@
 import socket
 
-from signal_processing import Signal
+from server_utils.signal import Signal
 
 
 class ConnetionError(BaseException):
@@ -66,10 +66,7 @@ class ChannelManager():
         response, _ = self.metadata_socket.recvfrom(32)
         return self._read_channel_connection_response(response)
 
-    def connect_channel(
-            self,
-            channel: int,
-            password=None) -> bool:  # TODO this does not work either
+    def connect_channel(self, channel: int, password=None) -> bool:  # TODO this does not work either
         if password is not None:
             return self._connect_securely(channel, password)
         return self._connect_channel(channel)
