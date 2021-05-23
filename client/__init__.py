@@ -14,11 +14,14 @@ def main():
     ui_thread.join()
 
 def mock_main():
-    address = ("127.0.0.1", 50002)
-    audio_server = EchoServer(address)
-    audio_server.start()
+    local_address = ("127.0.0.1", 50001)
+    echo = EchoServer(local_address)
+    local_address = ("127.0.0.1", 50002)
+    echo.start()
 
-    connection_manager = ConnectionManager(gui_state)
+    connection_manager = ConnectionManager(gui_state, local_address)
+
+    gui_state["server_ip"] = "127.0.0.1:50003"
     connection_manager.start()
 
     try:
@@ -27,4 +30,4 @@ def mock_main():
         print("Shutting down...")
         connection_manager.stop()
 
-    audio_server.stop()
+    echo.stop()

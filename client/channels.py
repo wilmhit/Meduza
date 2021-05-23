@@ -2,6 +2,7 @@ import socket
 
 from server_utils.signal import Signal
 
+TIMEOUT_SEC = 5
 
 class ConnetionError(BaseException):
     """Cannot connect to server"""
@@ -14,23 +15,24 @@ class PasswordError(BaseException):
 
 
 class ChannelManager():
-    def __init__(self, server_address: str, server_port: int):
-        self.server_address = (server_address, server_port)
+    def __init__(self, server_address, local_address):
+        self.server_address = server_address
         self.metadata_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.metadata_socket.bind(local_address)
+        self.metadata_socket.settimeout(TIMEOUT_SEC)
 
-    def check_server(self):
-        if not self.ping():
-            raise ConnetionError()
+    def ping(self) -> bool:
+        try:
+            message = Signal()
+            message.code = b"PNG"
 
-    def ping(self) -> bool:  # TODO This does not work
-        message = Signal()
-        message.code = b"PNG"
+            self.metadata_socket.sendto(message.get_message(), self.server_address)
+            returned, server = self.metadata_socket.recvfrom(32)
 
-        self.metadata_socket.sendto(message.get_message(), self.server_address)
-        returned, server = self.metadata_socket.recvfrom(32)
-
-        returned = Signal(returned)
-        return returned.code == b"PGR"
+            returned = Signal(returned)
+            return returned.code == b"PGR"
+        except socket.timeout:
+            return False
 
     def _send_connect_message(self, channel: int):
         message = Signal()
@@ -57,16 +59,22 @@ class ChannelManager():
         self.metadata_socket.sendto(message.get_message(), self.server_address)
 
     def _connect_channel(self, channel: int) -> bool:
-        self._send_connect_message(channel)
-        response, _ = self.metadata_socket.recvfrom(32)
-        return self._read_channel_connection_response(response)
+        try:
+            self._send_connect_message(channel)
+            response, _ = self.metadata_socket.recvfrom(32)
+            return self._read_channel_connection_response(response)
+        except socket.timeout:
+            return False
 
     def _connect_securely(self, channel: int, password: str) -> bool:
-        self._send_secure_connect_message(channel, password)
-        response, _ = self.metadata_socket.recvfrom(32)
-        return self._read_channel_connection_response(response)
+        try:
+            self._send_secure_connect_message(channel, password)
+            response, _ = self.metadata_socket.recvfrom(32)
+            return self._read_channel_connection_response(response)
+        except socket.timeout:
+            return False
 
-    def connect_channel(self, channel: int, password=None) -> bool:  # TODO this does not work either
+    def connect_channel(self, channel: int, password=None) -> bool:
         if password is not None:
             return self._connect_securely(channel, password)
         return self._connect_channel(channel)

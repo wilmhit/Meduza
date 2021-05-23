@@ -30,7 +30,7 @@ class BaseServer(abc.ABC):
             if args:
                 self._main_loop(*args)
             else:
-                self._main_loop
+                self._main_loop()
 
     def wait_for_join(self):
         """Blocks execution until thread is finished"""
