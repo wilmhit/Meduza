@@ -6,48 +6,62 @@ from .channels import ChannelManager
 from .gui_callbacks import gui_state as shared_vars
 from .voip import VoipClient
 
+from server_utils.abstract import BaseServer
+
 UPDATE_INTERVAL = 1
 
 
-class ConnectionManager():
-    def __init__(self, shared_vars: Dict[str, Any]):
+class ConnectionManager(BaseServer):
+    def __init__(self, shared_vars: Dict[str, Any],
+                 local_address: Tuple[str, int]):
         self.shared_vars = shared_vars
+        self.local_address = local_address
 
-    def get_connected_channel(self) -> Optional[int]:
+    def _main_loop(self):
+        self._running = self.shared_vars["is_running"]
+        self.connect()
+        time.sleep(UPDATE_INTERVAL)
+
+    def connect(self):
+        address = self.read_server_address()
+        if not address:
+            return
+
+        if self.__validate_connection(address):
+            self.watch_channels()
+
+    def watch_channels(self):
+        channel = self.get_selected_channel()
+        if type(channel) == int and self.connection.connect_channel(channel):
+            client = VoipClient(self.server_ip_tuple[0],self.connection.port)
+            client.loop_while(shared_vars)
+
+    def get_selected_channel(self) -> Optional[int]:
         for channel_id, channel in enumerate(self.shared_vars["channels"]):
             if channel["connected"] == True:
                 return channel_id
         return None
 
-    def read_server_address(self) -> Tuple[str, int]:
-        # TODO Return whatever is in shared_vars["server_ip"]
-        return "127.0.0.1", 50001
+    def read_server_address(self) -> Optional[Tuple[str, int]]:
+        try:
+            ip, port = shared_vars["server_ip"].split(":")
+            return ip, int(port)
+        except ValueError:
+            return None
 
-    def watch_channels(self):
-        connected_channel = self.get_connected_channel()
-        if self.get_connected_channel() is not None:
-            print("Connecting to channel")
-            # self.connection.connect_channel(connected_channel) TODO fix
-            self.connection.port = 1515  # TODO Delete once ChannelManager is fixed
-            # TODO handle channel denied
-            voip_client = \
-                VoipClient(self.server_ip_tuple[0], self.connection.port)
-            voip_client.loop_while(shared_vars)
+    def __validate_connection(self, address) -> bool:
+        if self.shared_vars["connection_validated"]:
+            return True
 
-    def connect(self):
-        print("Trying to connect to provided IP")
-        self.server_ip_tuple = self.read_server_address()
-        self.connection = ChannelManager(*self.server_ip_tuple)
-        self.shared_vars[
-            "connection_validated"] = True  #self.connection.check_server()
-        while self.shared_vars["connection_validated"]:
-            self.watch_channels()
-            print("Watching for channels")
-            time.sleep(UPDATE_INTERVAL)
+        self.connection = self.make_connection(address, self.local_address)
+        if self.connection:
+            self.shared_vars["connection_validated"] = True
+        return bool(self.connection)
 
-    def main_loop(self):
-        while self.shared_vars["is_running"]:
-            if self.shared_vars["server_ip"] != "":
-                self.connect()
-            print("Waiting for server IP")
-            time.sleep(UPDATE_INTERVAL)
+    @staticmethod
+    def make_connection(server_address, local_address) -> Optional[ChannelManager]:
+        connection = ChannelManager(server_address, local_address)
+        if connection.ping():
+            return connection
+        else:
+            return None

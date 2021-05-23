@@ -1,7 +1,9 @@
 from threading import Thread
 
 from .connect import ConnectionManager
+from .channels import ChannelManager
 from .gui import run_gui
+from server_utils.echo import EchoServer
 from .gui_callbacks import gui_state
 
 
@@ -9,10 +11,25 @@ def main():
     connection_manager = ConnectionManager(gui_state)
 
     ui_thread = Thread(target=run_gui)
-    connection_thread = Thread(target=connection_manager.main_loop)
-
     ui_thread.start()
-    connection_thread.start()
-
     ui_thread.join()
-    connection_thread.join()
+
+def mock_main():
+    local_address = ("127.0.0.1", 50002)
+    server_address = ("127.0.0.1", 50001) # Metadata port
+    channel_to_connect = 2
+
+    try:
+        channels = ChannelManager(server_address, local_address)
+        echo = EchoServer(local_address, soc=channels.metadata_socket)
+
+        print("Ping result: ", channels.ping())
+        connection_succesful = channels.connect_channel(channel_to_connect)
+        print("Connecting result: ", connection_succesful)
+        if connection_succesful:
+            print("Channel port: ", channels.port)
+
+        echo.start()
+    except KeyboardInterrupt:
+        print("\nShutting down")
+        echo.stop()
