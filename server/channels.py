@@ -20,7 +20,7 @@ class Channels:
             "thread": None
         }]
 
-        for num in range(1, number_of_channels):
+        for num in range(1, NUMBER_OF_CHANNELS):
             self.create_channel(num)
 
         print("channels dict has been created")
@@ -51,17 +51,17 @@ class Channels:
 
         return False
 
-    def add_user_to_channel(self, channel_number, userIP, userPort):
+    def add_user_to_channel(self, channel_number, user_address) -> int:
 
         if not self.channels[channel_number]['connected_users']:
             self.channels[channel_number]['thread'] = SingleChannel(
                 channel_number,
-                (self.main_ip_address, self.channels[channel_number]['port']))
-            self.channels[channel_number]['thread'].set_start_value()
+                (self.main_ip_address[0], self.channels[channel_number]['port']), 
+                self.channels[channel_number]['connected_users'])
             self.channels[channel_number]['thread'].start()
 
-        user = (userIP, userPort)
-        self.channels[channel_number]['connected_users'].append(user)
+        self.channels[channel_number]['connected_users'].append(user_address)
+        return self.channels[channel_number]['port']
 
     def del_user_from_channel(self, channel_number, userIP, userPort):
 

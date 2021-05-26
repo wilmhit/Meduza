@@ -5,7 +5,8 @@ from typing import Tuple, Any
 
 class BaseServer(abc.ABC):
     @abc.abstractmethod
-    def _main_loop(self):
+    @staticmethod
+    def _main_loop():
         """
         Use this function instead of creating your own loop. It is
         called every loop iteration like this:

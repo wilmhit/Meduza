@@ -48,12 +48,17 @@ class ChannelManager():
             raise PasswordError()
         if not response.code == b"ACC":
             raise ConnectionError("Server sent invalid response")
+
         self.port = int.from_bytes(response.two_byte, "big")
+
+        if self.port == 0:
+            raise ConnectionError("Server send port 0!")
+
         return True
 
     def _send_secure_connect_message(self, channel: int, password: str):
         message = Signal()
-        message.code = "PASS"
+        message.code = "PAS"
         message.two_byte = channel
         message.password = hash_pw(password)
         self.metadata_socket.sendto(message.get_message(), self.server_address)
