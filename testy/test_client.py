@@ -2,7 +2,11 @@ import socket
 import sys
 from threading import Thread
 from time import sleep
+import pyaudio
 
+FORMAT = pyaudio.paInt16
+CHANNELS = 1
+RATE = 44100
 CHUNK = 4096
 SERVER_ADDRESS = ('127.0.0.1', 10000)
 
