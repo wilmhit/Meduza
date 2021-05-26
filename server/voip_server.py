@@ -24,9 +24,9 @@ class ClientManager:
         channel_number = int.from_bytes(data_signal.two_byte, "big")
 
         if self.channels.get_count_of_active_user(channel_number) <= 5:
-            self.channels.add_user_to_channel(channel_number,
+            port = self.channels.add_user_to_channel(channel_number,
                                             sender_data[0], sender_data[1])
-            self._send_message("ACC", None, sender_data)
+            self._send_message("ACC", port, sender_data)
         else:
             self._send_message("DEN", None, sender_data)
 
