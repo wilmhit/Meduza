@@ -2,8 +2,8 @@ from .abstract import BaseServer
 import socket
 import time
 
-TIMEOUT_SEC = 1
-INTERVAL = .05
+TIMEOUT_SEC = 2
+INTERVAL = 1
 CHUNK = 4096
 
 class DummyAudioClient(BaseServer):

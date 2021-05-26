@@ -56,7 +56,8 @@ class Channels:
         if not self.channels[channel_number]['connected_users']:
             self.channels[channel_number]['thread'] = SingleChannel(
                 channel_number,
-                (self.main_ip_address[0], self.channels[channel_number]['port']))
+                (self.main_ip_address[0], self.channels[channel_number]['port']), 
+                self.channels[channel_number]['connected_users'])
             self.channels[channel_number]['thread'].start()
 
         self.channels[channel_number]['connected_users'].append(user_address)
