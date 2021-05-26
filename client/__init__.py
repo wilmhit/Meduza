@@ -8,7 +8,7 @@ from .gui_callbacks import gui_state
 
 
 def main():
-    connection_manager = ConnectionManager(gui_state)
+    connection_manager = ConnectionManager(gui_state, ("127.0.0.1", 50002))
 
     ui_thread = Thread(target=run_gui)
     ui_thread.start()
