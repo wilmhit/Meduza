@@ -3,7 +3,7 @@ from threading import Thread
 from .connect import ConnectionManager
 from .channels import ChannelManager
 from .gui import run_gui
-from server_utils.echo import EchoServer
+from server_utils.dummy_audio import DummyAudioClient
 from .gui_callbacks import gui_state
 
 
@@ -21,7 +21,9 @@ def mock_main():
 
     try:
         channels = ChannelManager(server_address, local_address)
-        echo = EchoServer(local_address, soc=channels.metadata_socket)
+        client = DummyAudioClient(local_address,
+                                  server_address,
+                                  soc=channels.metadata_socket)
 
         print("Ping result: ", channels.ping())
         connection_succesful = channels.connect_channel(channel_to_connect)
@@ -29,7 +31,7 @@ def mock_main():
         if connection_succesful:
             print("Channel port: ", channels.port)
 
-        echo.start()
+        client.start()
     except KeyboardInterrupt:
         print("\nShutting down")
-        echo.stop()
+        client.stop()
