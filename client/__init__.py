@@ -22,10 +22,6 @@ def mock_main():
 
     try:
         channels = ChannelManager(server_address, local_address)
-        channel_address = ("127.0.0.1", channels.port)
-        client = DummyAudioClient(local_address,
-                                  channel_address,
-                                  soc=channels.metadata_socket)
 
         print("Ping result: ", channels.ping())
         connection_succesful = channels.connect_channel(channel_to_connect)
@@ -33,6 +29,10 @@ def mock_main():
         if connection_succesful:
             print("Channel port: ", channels.port)
 
+        channel_address = ("127.0.0.1", channels.port)
+        client = DummyAudioClient(local_address,
+                                  channel_address,
+                                  soc=channels.metadata_socket)
         client.start()
     except KeyboardInterrupt:
         print("\nShutting down")

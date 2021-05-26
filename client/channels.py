@@ -53,7 +53,7 @@ class ChannelManager():
 
     def _send_secure_connect_message(self, channel: int, password: str):
         message = Signal()
-        message.code = "PASS"
+        message.code = "PAS"
         message.two_byte = channel
         message.password = hash_pw(password)
         self.metadata_socket.sendto(message.get_message(), self.server_address)
