@@ -37,8 +37,8 @@ class ClientManager:
         if data_signal.two_byte() == 0:
             if data_signal.rest() == self.channels.channels[0]['password']:
                 self.channels.add_user_to_channel(data_signal.two_byte,
-                                                  sender_data[0],
-                                                  sender_data[1])
+                                                sender_data[0],
+                                                sender_data[1])
                 self._send_message("ACC", None, sender_data)
             else:
                 self._send_message("DEN", None, sender_data)
@@ -46,7 +46,9 @@ class ClientManager:
             self._con_signal(data_signal, sender_data)
 
     def _xxx_signal(self, data_signal, sender_data):
-        self.channels.del_user_from_channel(data_signal.two_byte,
+        channel_number = int.from_bytes(data_signal.two_byte, "big")
+
+        self.channels.del_user_from_channel(channel_number,
                                             sender_data[0], sender_data[1])
 
     def _read_signal(self, data):

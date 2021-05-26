@@ -17,12 +17,14 @@ def main():
 def mock_main():
     local_address = ("127.0.0.1", 50002)
     server_address = ("127.0.0.1", 50001) # Metadata port
+
     channel_to_connect = 2
 
     try:
         channels = ChannelManager(server_address, local_address)
+        channel_address = ("127.0.0.1", channels.port)
         client = DummyAudioClient(local_address,
-                                  server_address,
+                                  channel_address,
                                   soc=channels.metadata_socket)
 
         print("Ping result: ", channels.ping())
