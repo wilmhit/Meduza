@@ -20,7 +20,7 @@ class Channels:
             "thread": None
         }]
 
-        for num in range(1, number_of_channels):
+        for num in range(1, NUMBER_OF_CHANNELS):
             self.create_channel(num)
 
         print("channels dict has been created")
@@ -56,8 +56,8 @@ class Channels:
         if not self.channels[channel_number]['connected_users']:
             self.channels[channel_number]['thread'] = SingleChannel(
                 channel_number,
-                (self.main_ip_address, self.channels[channel_number]['port']))
-            self.channels[channel_number]['thread'].set_start_value()
+                (self.main_ip_address[0], self.channels[channel_number]['port']))
+            #self.channels[channel_number]['thread'].set_start_value()
             self.channels[channel_number]['thread'].start()
 
         user = (userIP, userPort)
