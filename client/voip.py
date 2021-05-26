@@ -1,35 +1,53 @@
 import time
 from typing import Any, Dict
 
+CHUNK = 4096
 
 class VoipClient:
-    def __init__(self, server_ip, server_port):
-        self.server_ip = server_ip
-        self.server_port = server_port
-        # TODO here create audio streams
+    def __init__(self, server_address, soc):
+        self.server_address = server_address
+        self.soc = soc
+        self.audio = AudioStreams()
 
-    def loop_while(self, shared_vars: Dict[str, Any]):
+    def loop_while(shared_vars: Dict[str, Any]):
         while (shared_vars["channel_connected"]):
 
             if shared_vars["mute_mic"]:
-                self.send_dummy_audio()
+                self.send_dummy_audio(server, soc)
             else:
-                self.send_audio()
+                self.send_audio(server, server, soc)
 
             if shared_vars["mute_spk"]:
                 self.receive_dummy_audio()
             else:
                 self.receive_audio()
 
-    # Use audio streams in methods below
     def send_audio(self):
-        pass
+        audio = self.audio.record()
+        self.soc.sendto(audio, self.server_address)
 
     def send_dummy_audio(self):
-        pass
+        dummy_audio = int(0).to_bytes(CHUNK, "big")
+        self.soc.sendto(dummy_audio, self.server_address)
 
     def receive_dummy_audio(self):
-        pass
+        data, client = soc.recvfrom(CHUNK)
 
     def receive_audio(self):
+        data, client = soc.recvfrom(CHUNK)
+        self.audio.play(data)
+
+class AudioStreams:
+    def __init__(self):
+        stream = audio.open(format=FORMAT,
+                        channels=CHANNELS,
+                        rate=RATE,
+                        input=True,
+                        frames_per_buffer=CHUNK,
+                        stream_callback=callback)
+
+    def record(self) -> bytes:
+        return int(0).to_bytes(CHUNK, "big")
+
+    def play(self, audio: bytes):
         pass

@@ -18,7 +18,8 @@ class EchoServer(BaseServer):
         soc.settimeout(TIMEOUT_SEC)
         return (soc, )
 
-    def _main_loop(self, soc):
+    @staticmethod
+    def _main_loop(soc):
         try:
             data, client = soc.recvfrom(self.chunk_size)
             soc.sendto(data, client)
