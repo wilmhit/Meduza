@@ -7,9 +7,8 @@ INTERVAL = .05
 CHUNK = 4096
 
 class DummyAudioClient(BaseServer):
-    def __init__(self, address, server_address, chunk_size=1024, soc=None):
+    def __init__(self, address, server_address, soc=None):
         self.address = address
-        self.chunk_size = chunk_size
         self.socket = soc
         self.server_address = server_address
 
@@ -24,12 +23,13 @@ class DummyAudioClient(BaseServer):
         dummy_audio = int(0).to_bytes(CHUNK, "big")
         return (soc, dummy_audio, self.server_address)
 
-    def _main_loop(self, soc, audio, server):
+    @staticmethod
+    def _main_loop(soc, audio, server):
         try:
             soc.sendto(audio, server)
 
             try:
-                data, ip = soc.recvfrom(self.chunk_size)
+                data, ip = soc.recvfrom(CHUNK)
                 print(f"Received {data} back from {ip}")
             except BlockingIOError: ...
 
