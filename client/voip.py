@@ -1,7 +1,11 @@
 import time
 from typing import Any, Dict
+import pyaudio
 
+FORMAT = pyaudio.paInt16
 CHUNK = 4096
+CHANNELS = 1
+RATE = 44100
 
 class VoipClient:
     def __init__(self, server_address, soc):
@@ -9,7 +13,7 @@ class VoipClient:
         self.soc = soc
         self.audio = AudioStreams()
 
-    def loop_while(shared_vars: Dict[str, Any]):
+    def loop_while(self, shared_vars: Dict[str, Any]):
         while (shared_vars["channel_connected"]):
 
             if shared_vars["mute_mic"]:
@@ -39,6 +43,8 @@ class VoipClient:
 
 class AudioStreams:
     def __init__(self):
+        audio = pyaudio.PyAudio()
+        callback = lambda *_: ...
         stream = audio.open(format=FORMAT,
                         channels=CHANNELS,
                         rate=RATE,

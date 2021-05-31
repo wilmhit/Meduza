@@ -54,7 +54,7 @@ class ClientManager:
 
         sender_ip = data[1]  # do przetestowania !
         data_signal = Signal(data[0])
-        print(data_signal.get_message(), " code", data_signal.code)
+        print("Received message with code: ", data_signal.code)
         if data_signal.code == b"CON":
             self._con_signal(data_signal, sender_ip)
         elif data_signal.code == b"PNG":
@@ -80,7 +80,7 @@ class Server:
     def __init__(self, ip_address, ip_port, channel_0_pass,
                 number_of_channels):
         def acepted_cb(client_address, client_port):
-            print("Client connected! :)")
+            print("Client connected to channel")
 
         self.main_ip_port = ip_port
         self.main_ip_address = ip_address
