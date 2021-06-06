@@ -10,13 +10,17 @@ PORT_MIN = 51100
 PORT_MAX = PORT_MIN + 500
 
 def main():
-    connection_manager = ConnectionManager(gui_state, ("127.0.0.1", 50002))
-    connection_manager.start()
+    try:
+        connection_manager = ConnectionManager(gui_state, ("127.0.0.1", 50002))
+        connection_manager.start()
 
-    ui_thread = Thread(target=run_gui)
-    ui_thread.start()
-    ui_thread.join()
-    connection_manager.stop()
+        ui_thread = Thread(target=run_gui)
+        ui_thread.start()
+        ui_thread.join()
+        connection_manager.stop()
+    except KeyboardInterrupt:
+        print("\nShutting down")
+        exit(0)
 
 def mock_main():
     local_address = ("127.0.0.1", randint(PORT_MIN, PORT_MAX))
@@ -40,4 +44,4 @@ def mock_main():
         client.start()
     except KeyboardInterrupt:
         print("\nShutting down")
-        client.stop()
+        exit(0)

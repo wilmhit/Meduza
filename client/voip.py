@@ -1,9 +1,9 @@
 import time
 from typing import Any, Dict
-import pyaudio
+import pickle
+import pyshine
 
-FORMAT = pyaudio.paInt16
-CHUNK = 4096
+CHUNK = 1024 * 4
 CHANNELS = 1
 RATE = 44100
 
@@ -17,9 +17,9 @@ class VoipClient:
         while (shared_vars["channel_connected"]):
 
             if shared_vars["mute_mic"]:
-                self.send_dummy_audio(server, soc)
+                self.send_dummy_audio()
             else:
-                self.send_audio(server, server, soc)
+                self.send_audio()
 
             if shared_vars["mute_spk"]:
                 self.receive_dummy_audio()
@@ -43,17 +43,13 @@ class VoipClient:
 
 class AudioStreams:
     def __init__(self):
-        audio = pyaudio.PyAudio()
-        callback = lambda *_: ...
-        stream = audio.open(format=FORMAT,
-                        channels=CHANNELS,
-                        rate=RATE,
-                        input=True,
-                        frames_per_buffer=CHUNK,
-                        stream_callback=callback)
+        self.recording_stream, _ = pyshine.audioCapture(mode="send")
+        self.playback_stream, _ = pyshine.audioCapture(mode="get")
 
     def record(self) -> bytes:
-        return int(0).to_bytes(CHUNK, "big")
+        audio = self.recording_stream.get()
+        return pickle.dumps(audio)
 
     def play(self, audio: bytes):
-        pass
+        audio_frame = picke.loads(audio)
+        self.playback_stream.put(audio_frame)
