@@ -6,9 +6,9 @@ from .channels import Channels
 
 
 class ClientManager:
-    def __init__(self, IP_address, IP_port, acepted_cb, channels):
-        self.IP_address = IP_address
-        self.IP_port = IP_port
+    def __init__(self, ip, acepted_cb, channels):
+        self.IP_address = ip[0]
+        self.IP_port = ip[1]
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((self.IP_address, self.IP_port))
         self.acepted_cb = acepted_cb
@@ -70,7 +70,7 @@ class ClientManager:
 
 
     def listen(self):
-        print("listen method - ON\n")
+        print("Server is now listening...")
         while True:
             data = self.sock.recvfrom(32)
             self._read_signal(data)
@@ -82,14 +82,9 @@ class Server:
         def acepted_cb(client_address, client_port):
             print("Client connected to channel")
 
-        self.main_ip_port = ip_port
-        self.main_ip_address = ip_address
-
-        self.channels = Channels(channel_0_pass, number_of_channels,
-                                (self.main_ip_address, self.main_ip_port))
-        self.client_manager = ClientManager(self.main_ip_address,
-                                            self.main_ip_port, acepted_cb,
-                                            self.channels)
+        ip = (ip_address, ip_port)
+        self.channels = Channels(channel_0_pass, number_of_channels, ip)
+        self.client_manager = ClientManager(ip, acepted_cb, self.channels)
 
     def run(self):
         self.client_manager.listen()
