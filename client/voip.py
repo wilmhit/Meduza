@@ -56,6 +56,7 @@ class AudioStreams:
         self.dummy_record, _ = self.stream.read(self.frames_in_chunk)
 
     def record_dummy(self):
+        self.stream.read(self.frames_in_chunk)
         return pickle.dumps(self.dummy_record)
 
     @property
