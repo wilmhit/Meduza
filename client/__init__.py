@@ -5,6 +5,7 @@ from .channels import ChannelManager
 from .gui import run_gui
 from server_utils.dummy_audio import DummyAudioClient
 from .gui_callbacks import gui_state
+from os import _exit as force_exit
 
 PORT_MIN = 51100
 PORT_MAX = PORT_MIN + 500
@@ -18,9 +19,10 @@ def main():
         ui_thread.start()
         ui_thread.join()
         connection_manager.stop()
+        force_exit(0)
     except KeyboardInterrupt:
         print("\nShutting down")
-        exit(0)
+        force_exit(0)
 
 def mock_main():
     local_address = ("127.0.0.1", randint(PORT_MIN, PORT_MAX))
@@ -44,4 +46,4 @@ def mock_main():
         client.start()
     except KeyboardInterrupt:
         print("\nShutting down")
-        exit(0)
+        force_exit(0)

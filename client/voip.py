@@ -35,10 +35,10 @@ class VoipClient:
         self.soc.sendto(dummy_audio, self.server_address)
 
     def receive_dummy_audio(self):
-        data, client = soc.recvfrom(CHUNK)
+        data, client = self.soc.recvfrom(CHUNK)
 
     def receive_audio(self):
-        data, client = soc.recvfrom(CHUNK)
+        data, client = self.soc.recvfrom(CHUNK)
         self.audio.play(data)
 
 class AudioStreams:
@@ -51,5 +51,4 @@ class AudioStreams:
         return pickle.dumps(audio)
 
     def play(self, audio: bytes):
-        audio_frame = picke.loads(audio)
-        self.playback_stream.put(audio_frame)
+        self.playback_stream.put(audio)
