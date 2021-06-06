@@ -24,17 +24,17 @@ class AudioStreams:
         return int(SECONDS_AUDIO * RATE)
 
     def record(self):
-        audio = self.stream.read(self.frames_in_chunk)
-        return audio
+        audio, _ = self.stream.read(self.frames_in_chunk)
+        return pickle.dumps(audio)
 
     def play(self, audio):
-        self.stream.write(audio)
+        self.stream.write(pickle.loads(audio))
 
 streams = AudioStreams()
 i = 0
 while True:
     i += 1
-    audio, _ = streams.record()
+    audio = streams.record()
     streams.play(audio)
     print(len(audio))
     print(i)

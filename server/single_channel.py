@@ -5,6 +5,7 @@ from server_utils.abstract import BaseServer
 from typing import Any, Tuple
 
 
+CHUNK = 4249
 
 class SingleChannel(BaseServer):
     def __init__(self, channel_num, ip:Tuple[str, int], connected_users) -> None:
@@ -18,7 +19,7 @@ class SingleChannel(BaseServer):
         received_packets = []
         try:
             while True:
-                data, user = socket.recvfrom(4096)
+                data, user = socket.recvfrom(CHUNK)
                 received_packets.append((data, user))
         except BlockingIOError: ...
 

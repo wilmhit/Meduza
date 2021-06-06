@@ -4,7 +4,7 @@ import time
 
 TIMEOUT_SEC = 2
 INTERVAL = 1
-CHUNK = 4096
+CHUNK = 4249
 
 class DummyAudioClient(BaseServer):
     def __init__(self, address, server_address, soc=None):
