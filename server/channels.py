@@ -23,8 +23,6 @@ class Channels:
         for num in range(1, NUMBER_OF_CHANNELS):
             self.create_channel(num)
 
-        print("channels dict has been created")
-
     def create_channel(self, channel_num):
         if channel_num not in self.channels:
             self.channels.append({
