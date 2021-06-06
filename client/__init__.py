@@ -11,10 +11,12 @@ PORT_MAX = PORT_MIN + 500
 
 def main():
     connection_manager = ConnectionManager(gui_state, ("127.0.0.1", 50002))
+    connection_manager.start()
 
     ui_thread = Thread(target=run_gui)
     ui_thread.start()
     ui_thread.join()
+    connection_manager.stop()
 
 def mock_main():
     local_address = ("127.0.0.1", randint(PORT_MIN, PORT_MAX))

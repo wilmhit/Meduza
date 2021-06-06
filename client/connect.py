@@ -28,12 +28,13 @@ class ConnectionManager(BaseServer):
             return
 
         if self.__validate_connection(address):
+            self.server_ip = address
             self.watch_channels()
 
     def watch_channels(self):
         channel = self.get_selected_channel()
         if type(channel) == int and self.connection.connect_channel(channel):
-            client = VoipClient(self.server_ip_tuple[0],self.connection.port)
+            client = VoipClient(self.server_ip[0],self.connection.port)
             client.loop_while(shared_vars)
 
     def get_selected_channel(self) -> Optional[int]:

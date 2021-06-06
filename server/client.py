@@ -24,7 +24,6 @@ class client:
         signal = str(
             data[0][0:3], "UTF-8"
         )  #wyciągnięcie indentyfikatora sygnału (3 pierwsze symbole)
-        print(signal)
         if signal == "PNG":
             self.png_signal(data)
         elif signal == "CON":
