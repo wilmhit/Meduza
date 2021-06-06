@@ -1,11 +1,14 @@
 import time
 from typing import Any, Dict
+import sounddevice as sd
 import pickle
-import pyshine
 
 CHUNK = 1024 * 4
 CHANNELS = 1
 RATE = 44100
+
+# How many seconds of audio fits into one chunk?
+SECONDS_AUDIO = CHUNK // (RATE // 8) 
 
 class VoipClient:
     def __init__(self, server_address, soc):
@@ -41,14 +44,3 @@ class VoipClient:
         data, client = self.soc.recvfrom(CHUNK)
         self.audio.play(data)
 
-class AudioStreams:
-    def __init__(self):
-        self.recording_stream, _ = pyshine.audioCapture(mode="send")
-        self.playback_stream, _ = pyshine.audioCapture(mode="get")
-
-    def record(self) -> bytes:
-        audio = self.recording_stream.get()
-        return pickle.dumps(audio)
-
-    def play(self, audio: bytes):
-        self.playback_stream.put(audio)
