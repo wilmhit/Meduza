@@ -10,6 +10,7 @@ RATE = 44100
 # How many seconds of audio fits into one chunk?
 SECONDS_AUDIO = CHUNK / (RATE * 4)
 
+
 class VoipClient:
     def __init__(self, server_address, soc):
         self.server_address = server_address
@@ -47,7 +48,6 @@ class VoipClient:
 
 
 class AudioStreams:
-
     def __init__(self):
         sd.default.samplerate = RATE
         sd.default.channels = 1
