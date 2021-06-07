@@ -12,7 +12,8 @@ PORT_MAX = PORT_MIN + 500
 
 def main():
     try:
-        connection_manager = ConnectionManager(gui_state, ("127.0.0.1", 50002))
+        local_address = ("127.0.0.1", randint(PORT_MIN, PORT_MAX))
+        connection_manager = ConnectionManager(gui_state, local_address)
         connection_manager.start()
 
         ui_thread = Thread(target=run_gui)
