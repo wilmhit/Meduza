@@ -69,11 +69,16 @@ class Channels:
         channel_dict['connected_users'].append(user_address)
         return channel_dict['port']
 
-    def del_user_from_channel(self, channel_number, user_address):
-        channel_dict =  self.channels[channel_number]
-        channel_dict['connected_users'].remove(user_address)
+    def find_channel_by_user(self, user):
+        for channel_num in range(len(self.channels)):
+            if user in self.channels[channel_num]["connected_users"]:
+                return channel_num
 
-        if len(channel_dict['connected_users']) == 0:
+    def del_user_from_channel(self, user):
+        channel_dict =  self.channels[self.find_channel_by_user(user)]
+        channel_dict['connected_users'].remove(user)
+
+        if not channel_dict['connected_users']:
             channel_dict['thread'].stop()
 
     def get_count_of_active_user(self, channel_number):

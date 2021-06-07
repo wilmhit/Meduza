@@ -31,9 +31,6 @@ class ClientManager:
         else:
             self._send_message("DEN", None, sender_data)
 
-    def reply_ping(self, sender_ip):
-        self._send_message("PGR", None, sender_ip)
-
     def _pas_signal(self, data_signal, sender_data):
         if data_signal.two_byte() == 0:
             if data_signal.rest() == self.channels.channels[0]['password']:
@@ -45,25 +42,20 @@ class ClientManager:
         else:
             self._con_signal(data_signal, sender_data)
 
-    def _xxx_signal(self, data_signal, sender_data):
-        channel_number = int.from_bytes(data_signal.two_byte, "big")
-
-        self.channels.del_user_from_channel(channel_number,
-                                            sender_data[0], sender_data[1])
 
     def _read_signal(self, data):
-
-        sender_ip = data[1]  # do przetestowania !
+        sender = data[1]
         data_signal = Signal(data[0])
         print("Received message with code: ", data_signal.code)
+
         if data_signal.code == b"CON":
-            self._con_signal(data_signal, sender_ip)
+            self._con_signal(data_signal, sender)
         elif data_signal.code == b"PNG":
-            self.reply_ping(sender_ip)
+            self._send_message("PGR", None, sender)
         elif data_signal.code == b"PAS":
-            self._pas_signal(data_signal, sender_ip)
+            self._pas_signal(data_signal, sender)
         elif data_signal.code == b"XXX":
-            self._xxx_signal(data_signal, sender_ip)
+            self.channels.del_user_from_channel(sender)
         else:
             raise ConnectionError("Client send invalid signal")
 
