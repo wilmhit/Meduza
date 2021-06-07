@@ -1,4 +1,5 @@
 import socket
+import time
 
 from server_utils.signal import Signal
 
@@ -20,6 +21,7 @@ class ChannelManager():
         self.metadata_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.metadata_socket.bind(local_address)
         self.metadata_socket.settimeout(TIMEOUT_SEC)
+        self.port = None
 
     def ping(self) -> bool:
         try:
@@ -33,6 +35,21 @@ class ChannelManager():
             return returned.code == b"PGR"
         except socket.timeout:
             return False
+
+    def disconnect_channel(self):
+        self._send_disconnect_message()
+        self.port = None
+        self.clear_socket(self.metadata_socket)
+
+    def connect_channel(self, channel: int, password=None) -> bool:
+        if password is not None:
+            return self._connect_securely(channel, password)
+        return self._connect_channel(channel)
+
+    def _send_disconnect_message(self):
+        message = Signal()
+        message.code = b"XXX"
+        self.metadata_socket.sendto(message.get_message(), self.server_address)
 
     def _send_connect_message(self, channel: int):
         message = Signal()
@@ -79,11 +96,16 @@ class ChannelManager():
         except socket.timeout:
             return False
 
-    def connect_channel(self, channel: int, password=None) -> bool:
-        if password is not None:
-            return self._connect_securely(channel, password)
-        return self._connect_channel(channel)
+    @staticmethod
+    def clear_socket(soc):
+        try:
+            while True:
+                soc.recvfrom(1)
+        except socket.timeout:
+            pass
+
+
 
 
 def hash_pw(password: bytes) -> bytes:
-    return b"x" * 27  # TODO
+    return b"2" * 27  # TODO
