@@ -55,8 +55,7 @@ class ClientManager:
         elif data_signal.code == b"PAS":
             self._pas_signal(data_signal, sender)
         elif data_signal.code == b"XXX":
-            channel_number = int.from_bytes(data_signal.two_byte, "big")
-            self.channels.del_user_from_channel(channel_number, sender)
+            self.channels.del_user_from_channel(sender)
         else:
             raise ConnectionError("Client send invalid signal")
 
