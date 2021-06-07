@@ -34,8 +34,10 @@ class ConnectionManager(BaseServer):
     def watch_channels(self):
         channel = self.get_selected_channel()
         if type(channel) == int and self.connection.connect_channel(channel):
-            client = VoipClient(self.server_ip[0],self.connection.port)
+            voip_address = self.server_ip[0],self.connection.port
+            client = VoipClient(voip_address, self.connection.metadata_socket)
             client.loop_while(shared_vars)
+            # TODO send XXX message, wait 
 
     def get_selected_channel(self) -> Optional[int]:
         for channel_id, channel in enumerate(self.shared_vars["channels"]):
