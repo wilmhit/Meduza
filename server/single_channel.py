@@ -40,7 +40,6 @@ class SingleChannel(BaseServer):
     def register_inactivities(store, packets, users):
         _, active_users = zip(*packets)
         inactive_users = [user for user in users if user not in active_users]
-        print("Registered incactivty of:", inactive_users)
         store.register_inactivity(inactive_users)
 
     @staticmethod
