@@ -4,6 +4,8 @@ from threading import Thread
 from server_utils.abstract import BaseServer
 from server_utils.inactivity import InactivityStore
 from typing import Any, Tuple
+from server_utils.audio_merge import audioMerge
+import pickle
 
 
 CHUNK = 4249
@@ -25,6 +27,13 @@ class SingleChannel(BaseServer):
 
 
         if len(received_packets) > 0:
+
+            mergeAudio = audioMerge(received_packets)
+
+            for user in connected_users:
+                audio_pck = mergeAudio.get_audio_for_user(user)
+                cls.send_audio(audio_pck, socket, user)
+
             cls.register_inactivities(inactivity_store, received_packets,
                                     connected_users)
             for user in inactivity_store.inactive_keys:
@@ -32,9 +41,8 @@ class SingleChannel(BaseServer):
                 connected_users.remove(user)
                 inactivity_store.remove_key(user)
 
-            cls.send_audio(received_packets[0][0], connected_users, socket)
-        else:
-            time.sleep(0.01)
+                
+        
 
     @staticmethod
     def register_inactivities(store, packets, users):
@@ -43,9 +51,8 @@ class SingleChannel(BaseServer):
         store.register_inactivity(inactive_users)
 
     @staticmethod
-    def send_audio(receive, connected_users, socket):
-        for user in connected_users:
-            socket.sendto(receive, user)
+    def send_audio(receive, socket, user):
+        socket.sendto(receive, user)
 
     def _thread_local(self) -> Tuple[Any]:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

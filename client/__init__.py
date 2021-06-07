@@ -44,8 +44,8 @@ def mock_main():
 
         channel_address = ("127.0.0.1", channels.port)
         client = DummyAudioClient(local_address,
-                                  channel_address,
-                                  soc=channels.metadata_socket)
+                                channel_address,
+                                soc=channels.metadata_socket)
         client.start()
     except KeyboardInterrupt:
         print("\nShutting down")
