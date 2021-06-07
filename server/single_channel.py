@@ -42,3 +42,17 @@ class SingleChannel(BaseServer):
         sock.bind(self.ip)
         sock.setblocking(False)
         return (sock, self.connected_users)
+
+
+class mock_SingleChannel(BaseServer):
+    def __init__(*args) -> None:
+        pass
+
+    @classmethod
+    def _main_loop(*args) -> None:
+
+        time.sleep(0.5)
+        # TO DO -> nasłuchiwanie na sokocie oraz obsługa / przekazywanie do pozostałych
+
+    def _thread_local(self) -> Tuple[Any]:
+        pass

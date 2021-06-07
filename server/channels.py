@@ -1,5 +1,5 @@
 from random import randint
-from threading import Thread
+from threading import Thread, ThreadError
 
 from .single_channel import SingleChannel
 
@@ -9,9 +9,10 @@ NUMBER_OF_CHANNELS = 10
 
 
 class Channels:
-    def __init__(self, channel_0_pass: str, ip_port: int, ip_address: str):
+    def __init__(self, channel_0_pass: str, ip_port: int, ip_address: str, ThreadClass):
         self.main_ip_port = ip_port
         self.main_ip_address = ip_address
+        self.ThreadClass = ThreadClass
 
         self.channels = [{
             "port": PORT_MIN,
@@ -24,13 +25,23 @@ class Channels:
             self.create_channel(num)
 
     def create_channel(self, channel_num):
+        port = self.get_port_num()
+
         if channel_num not in self.channels:
             self.channels.append({
-                "port": self.get_port_num(),
+                "port": port,
                 "password": None,
                 "connected_users": [],
                 "thread": None
             })
+
+            channel_ip = (self.main_ip_address[0], port)
+            thread = self.ThreadClass(channel_num,
+                                    channel_ip, 
+                                    self.channels[channel_num]['connected_users'])
+
+            self.channels[channel_num]["thread"] = thread
+        
 
     def get_port_num(self):
         port = randint(PORT_MIN, PORT_MAX)
@@ -50,25 +61,20 @@ class Channels:
         return False
 
     def add_user_to_channel(self, channel_number, user_address) -> int:
+        channel_dict =  self.channels[channel_number]
 
-        if not self.channels[channel_number]['connected_users']:
-            self.channels[channel_number]['thread'] = SingleChannel(
-                channel_number,
-                (self.main_ip_address[0], self.channels[channel_number]['port']), 
-                self.channels[channel_number]['connected_users'])
-            self.channels[channel_number]['thread'].start()
+        if not channel_dict['connected_users']:
+            channel_dict['thread'].start()
 
-        self.channels[channel_number]['connected_users'].append(user_address)
-        return self.channels[channel_number]['port']
+        channel_dict['connected_users'].append(user_address)
+        return channel_dict['port']
 
-    def del_user_from_channel(self, channel_number, userIP, userPort):
+    def del_user_from_channel(self, channel_number, user_address):
+        channel_dict =  self.channels[channel_number]
+        channel_dict['connected_users'].remove(user_address)
 
-        if self.channels[channel_number]['connected_users']:
-            self.channels[channel_number]['thread'].set_stop_value()
-            self.channels[channel_number]['thread'] = None
-
-        user = (userIP, userPort)
-        self.channels[channel_number]['connected_users'].remove(user)
+        if len(channel_dict['connected_users']) == 0:
+            channel_dict['thread'].stop()
 
     def get_count_of_active_user(self, channel_number):
         return len(self.channels[channel_number]['connected_users'])

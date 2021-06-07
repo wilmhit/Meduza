@@ -1,3 +1,4 @@
+from server.single_channel import SingleChannel
 import socket
 import time
 from threading import Thread
@@ -6,12 +7,12 @@ from .channels import Channels
 
 
 class ClientManager:
-    def __init__(self, ip, acepted_cb, channels):
+    def __init__(self, ip, channels):
         self.IP_address = ip[0]
         self.IP_port = ip[1]
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((self.IP_address, self.IP_port))
-        self.acepted_cb = acepted_cb
+        #self.acepted_cb = acepted_cb
         self.channels = channels
 
     def _send_message(self, code, channel, sender_data):
@@ -76,15 +77,16 @@ class ClientManager:
             self._read_signal(data)
 
 
+
 class Server:
     def __init__(self, ip_address, ip_port, channel_0_pass,
                 number_of_channels):
-        def acepted_cb(client_address, client_port):
-            print("Client connected to channel")
+        #def acepted_cb(client_address, client_port):
+        #    print("Client connected to channel")
 
         ip = (ip_address, ip_port)
-        self.channels = Channels(channel_0_pass, number_of_channels, ip)
-        self.client_manager = ClientManager(ip, acepted_cb, self.channels)
+        self.channels = Channels(channel_0_pass, number_of_channels, ip, SingleChannel)
+        self.client_manager = ClientManager(ip, self.channels)
 
     def run(self):
         self.client_manager.listen()
