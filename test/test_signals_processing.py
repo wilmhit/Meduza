@@ -1,6 +1,6 @@
 import unittest
 
-from signal_processing import Signal
+from server_utils.signal import Signal
 
 
 class TestSignalProcessing(unittest.TestCase):
