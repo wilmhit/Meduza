@@ -51,4 +51,19 @@ class SingleChannel(BaseServer):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(self.ip)
         sock.setblocking(False)
+
         return (sock, self.connected_users, InactivityStore())
+        return (sock, self.connected_users)
+
+
+class mock_SingleChannel(BaseServer):
+    def __init__(*args) -> None:
+        pass
+
+    @classmethod
+    def _main_loop(*args) -> None:
+        time.sleep(0.5)
+
+    def _thread_local(self) -> Tuple[Any]:
+        pass
+
