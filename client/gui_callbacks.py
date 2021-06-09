@@ -9,7 +9,7 @@ from typing import Dict, Union
 S_BETWEEN_CLICKS = 0.005
 CHANNELS = 5
 
-gui_state = {
+gui_state = { # TODO refactor
     "is_running": True,
     "mute_mic": False,
     "mute_spk": False,
@@ -21,7 +21,7 @@ gui_state = {
     # information by iteration through channels, but reading bool is faster
     # and this value is read very often
     "channel_connected": False,
-    "channels": []
+    "channels": [],
 }
 
 # Creating channels
@@ -112,3 +112,5 @@ def connect_to_server(address: str):
 
 def mute_spk(_):
     gui_state["mute_spk"] = not gui_state["mute_spk"]
+
+gui_state["disconnect_channel"] = disconnect_channel

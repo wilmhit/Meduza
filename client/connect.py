@@ -18,6 +18,7 @@ class ConnectionManager(BaseServer):  # TODO refactor
     def __init__(self, shared_vars: Dict[str, Any], local_address: Tuple[str, int]):
         self.shared_vars = shared_vars
         self.local_address = local_address
+        self.connection = None
 
     def _main_loop(self):
         self._running = self.shared_vars["is_running"]
@@ -45,6 +46,7 @@ class ConnectionManager(BaseServer):  # TODO refactor
                 logger.warn("Lost connection during VOIP")
                 self.shared_vars["connection_validated"] = False
             self.connection.disconnect_channel()
+            self.shared_vars["disconnect_channel"]()
 
     def get_selected_channel(self) -> Optional[int]:
         for channel_id, channel in enumerate(self.shared_vars["channels"]):
@@ -63,7 +65,9 @@ class ConnectionManager(BaseServer):  # TODO refactor
         if self.shared_vars["connection_validated"]:
             return True
 
-        self.connection = self.make_connection(address, self.local_address)
+        if not self.connection:
+            self.connection = self.make_connection(address, self.local_address)
+
         if self.connection:
             self.shared_vars["connection_validated"] = True
         else:
