@@ -14,9 +14,8 @@ UPDATE_INTERVAL = 1
 logger = getLogger("client")
 
 
-class ConnectionManager(BaseServer):
-    def __init__(self, shared_vars: Dict[str, Any],
-                 local_address: Tuple[str, int]):
+class ConnectionManager(BaseServer):  # TODO refactor
+    def __init__(self, shared_vars: Dict[str, Any], local_address: Tuple[str, int]):
         self.shared_vars = shared_vars
         self.local_address = local_address
 
@@ -38,11 +37,13 @@ class ConnectionManager(BaseServer):
         channel = self.get_selected_channel()
         if type(channel) == int and self.connection.connect_channel(channel):
             try:
-                voip_address = self.server_ip[0],self.connection.port
-                client = VoipClient(voip_address, self.connection.metadata_socket)
+                voip_address = self.server_ip[0], self.connection.port
+                client = VoipClient(voip_address,
+                                    self.connection.metadata_socket)
                 client.loop_while(shared_vars)
             except SocketTimeoutException:
                 logger.warn("Lost connection during VOIP")
+                self.shared_vars["connection_validated"] = False
             self.connection.disconnect_channel()
 
     def get_selected_channel(self) -> Optional[int]:
@@ -65,10 +66,14 @@ class ConnectionManager(BaseServer):
         self.connection = self.make_connection(address, self.local_address)
         if self.connection:
             self.shared_vars["connection_validated"] = True
+        else:
+            logger.warn("Could not reach server")
+            self.shared_vars["server_ip"] = ""
         return bool(self.connection)
 
     @staticmethod
-    def make_connection(server_address, local_address) -> Optional[ChannelManager]:
+    def make_connection(server_address,
+                        local_address) -> Optional[ChannelManager]:
         connection = ChannelManager(server_address, local_address)
         if connection.ping():
             return connection
