@@ -48,7 +48,8 @@ class ChannelManager():
         self.clear_socket(self.metadata_socket)
 
     def connect_channel(self, channel: int, password=None) -> bool:
-        if password is not None:
+        raise TypeError("lolo")
+        if password:
             return self._connect_securely(channel, password)
         return self._connect_channel(channel)
 
@@ -84,7 +85,7 @@ class ChannelManager():
         message = Signal()
         message.code = "PAS"
         message.two_byte = channel
-        message.password = hash_pw(password)
+        message.password = hash_pw(password, 27)
         self.metadata_socket.sendto(message.get_message(), self.server_address)
 
     def _connect_channel(self, channel: int) -> bool:
@@ -110,9 +111,3 @@ class ChannelManager():
                 soc.recvfrom(1)
         except socket.timeout:
             pass
-
-
-
-
-def hash_pw(password: bytes) -> bytes:
-    return b"2" * 27  # TODO
