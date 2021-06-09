@@ -5,7 +5,9 @@ from threading import Thread
 from logging import info, debug
 from server_utils.signal import Signal
 from .channels import Channels
+import logging
 
+logger = logging.getLogger("server")
 
 class ClientManager:
     def __init__(self, ip, channels):
@@ -47,7 +49,7 @@ class ClientManager:
     def _read_signal(self, data):
         sender = data[1]
         data_signal = Signal(data[0])
-        debug("Received message with code: ", data_signal.code)
+        logger.debug(f"Received message with code: {data_signal.code}")
 
         if data_signal.code == b"CON":
             self._con_signal(data_signal, sender)
@@ -64,7 +66,7 @@ class ClientManager:
 
 
     def listen(self):
-        info("Server is now listening...")
+        logger.info("Server is now listening...")
         while True:
             data = self.sock.recvfrom(32)
             self._read_signal(data)

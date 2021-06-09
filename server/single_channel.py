@@ -6,6 +6,9 @@ from server_utils.inactivity import InactivityStore
 from typing import Any, Tuple
 from server_utils.audio_merge import audioMerge
 import pickle
+import logging
+
+logger = logging.getLogger("server")
 
 
 CHUNK = 4249
@@ -25,7 +28,6 @@ class SingleChannel(BaseServer):
                 received_packets.append((data, user))
         except BlockingIOError: ...
 
-
         if len(received_packets) > 0:
 
             mergeAudio = audioMerge(received_packets)
@@ -37,12 +39,9 @@ class SingleChannel(BaseServer):
             cls.register_inactivities(inactivity_store, received_packets,
                                     connected_users)
             for user in inactivity_store.inactive_keys:
-                debug(f"Kicked user: {user}")
+                logger.debug(f"Kicked user: {user}")
                 connected_users.remove(user)
                 inactivity_store.remove_key(user)
-
-                
-        
 
     @staticmethod
     def register_inactivities(store, packets, users):
