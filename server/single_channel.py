@@ -37,7 +37,7 @@ class SingleChannel(BaseServer):
             cls.register_inactivities(inactivity_store, received_packets,
                                     connected_users)
             for user in inactivity_store.inactive_keys:
-                print(f"Kicked user: {user}")
+                debug(f"Kicked user: {user}")
                 connected_users.remove(user)
                 inactivity_store.remove_key(user)
 

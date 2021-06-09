@@ -1,7 +1,9 @@
-import socket
 from threading import Thread
+from logging import DEBUG, INFO
+import logging
 from .voip_server import Server, ClientManager
 from server_utils.echo import EchoServer
+from server_utils.logger import create_logger
 
 from .voip_server import Server
 
@@ -12,6 +14,9 @@ NUM_OF_CHANNELS = 10
 
 
 def main():
+    logger = create_logger("server", DEBUG)
+    logger.info("Starting server")
+
     server = Server(UDP_IP, UDP_PORT, PASSWORD, NUM_OF_CHANNELS)
     server.run()
     #rec_thr = Thread(target=Server.listen)
