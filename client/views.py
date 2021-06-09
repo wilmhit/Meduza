@@ -56,11 +56,10 @@ class MainHeaderBar(Gtk.HeaderBar):
 
 
 class MainContent(Gtk.Grid):
-    def __init__(self, parent):
+    def __init__(self, main_window):
         Gtk.Grid.__init__(self)
         self.set_column_spacing(10)
         self.set_row_spacing(10)
-        self.parent = parent
 
         boom_button = Gtk.Button(label="Detonate")
         mute_mic_checkbox = Gtk.CheckButton(label="Mute mic")
@@ -77,7 +76,7 @@ class MainContent(Gtk.Grid):
         mute_mic_checkbox.connect("clicked", gui_callbacks.mute_mic)
         mute_all_checkbox.connect("clicked", gui_callbacks.mute_spk)
 
-        channel_list = ChannelList()
+        channel_list = ChannelList(main_window)
 
         # Row Column Width Height        R  C  W  H
         self.attach(channel_list, 0, 0, 1, 4)
@@ -87,8 +86,9 @@ class MainContent(Gtk.Grid):
 
 
 class ChannelList(Gtk.Frame):
-    def __init__(self):
+    def __init__(self, main_window):
         Gtk.Frame.__init__(self)
+        self.main_window = main_window
 
         self.channels = self.create_channel_list()
         channel_list = Gtk.ListBox()
@@ -146,7 +146,7 @@ class ChannelList(Gtk.Frame):
             return gui_callbacks.disconnect_channel()
 
         if gui_callbacks.is_protected_channel(channel_id):
-            PasswordModal(self.parent).run()
+            PasswordModal(self.main_window).run()
         else:
             gui_callbacks.connect_channel(channel_id)
 
@@ -193,6 +193,7 @@ class ServerModal(Gtk.Dialog):
         label.set_justify(Gtk.Justification.CENTER)
 
         self.entry = Gtk.Entry()
+        self.entry.connect("activate", self.on_response, self, Gtk.ResponseType.OK)
         self.entry.set_max_length(MAX_SERVER_ADDRESS)
         self.entry.set_margin_bottom(30)
         self.entry.set_margin_left(30)
@@ -202,7 +203,7 @@ class ServerModal(Gtk.Dialog):
         self.vbox.add(self.entry)
         self.vbox.set_border_width(10)
         self.show_all()
-
+    
     def on_response(self, dialog, response):
         if response == Gtk.ResponseType.OK:
             gui_callbacks.connect_to_server(self.entry.get_text())
