@@ -1,4 +1,5 @@
 import time
+from socket import timeout as SocketTimeoutException
 from threading import Thread
 from typing import Any, Dict, Optional, Tuple
 
@@ -7,8 +8,10 @@ from .gui_callbacks import gui_state as shared_vars
 from .voip import VoipClient
 
 from server_utils.abstract import BaseServer
+from logging import getLogger
 
 UPDATE_INTERVAL = 1
+logger = getLogger("client")
 
 
 class ConnectionManager(BaseServer):
@@ -34,9 +37,12 @@ class ConnectionManager(BaseServer):
     def watch_channels(self):
         channel = self.get_selected_channel()
         if type(channel) == int and self.connection.connect_channel(channel):
-            voip_address = self.server_ip[0],self.connection.port
-            client = VoipClient(voip_address, self.connection.metadata_socket)
-            client.loop_while(shared_vars)
+            try:
+                voip_address = self.server_ip[0],self.connection.port
+                client = VoipClient(voip_address, self.connection.metadata_socket)
+                client.loop_while(shared_vars)
+            except SocketTimeoutException:
+                logger.warn("Lost connection during VOIP")
             self.connection.disconnect_channel()
 
     def get_selected_channel(self) -> Optional[int]:

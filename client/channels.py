@@ -1,9 +1,11 @@
 import socket
 import time
+import logging
 
 from server_utils.signal import Signal
 
 TIMEOUT_SEC = 5
+logger = logging.getLogger("client")
 
 class ConnetionError(BaseException):
     """Cannot connect to server"""
@@ -29,11 +31,15 @@ class ChannelManager():
             message.code = b"PNG"
 
             self.metadata_socket.sendto(message.get_message(), self.server_address)
-            returned, server = self.metadata_socket.recvfrom(32)
+            returned, _ = self.metadata_socket.recvfrom(32)
 
             returned = Signal(returned)
-            return returned.code == b"PGR"
+            result = returned.code == b"PGR"
+
+            logger.debug(f"Ping result: {result}")
+            return result
         except socket.timeout:
+            logger.warn("Pinging timed out")
             return False
 
     def disconnect_channel(self):
@@ -64,12 +70,13 @@ class ChannelManager():
         if response.code == b"PRQ":
             raise PasswordError()
         if not response.code == b"ACC":
-            raise ConnectionError("Server sent invalid response")
+            msg = "Server sent invalid response"
+            logger.warn(msg)
+            raise ConnectionError(msg)
 
-        self.port = int.from_bytes(response.two_byte, "big")
-
-        if self.port == 0:
-            raise ConnectionError("Server send port 0!")
+        if (port := int.from_bytes(response.two_byte, "big")) != 0:
+            self.port = port
+            logger.info(f"Audio port set to: {port}")
 
         return True
 

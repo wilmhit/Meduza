@@ -40,10 +40,10 @@ class VoipClient:
         self.soc.sendto(dummy_audio, self.server_address)
 
     def receive_dummy_audio(self):
-        data, client = self.soc.recvfrom(self.packet_size)
+        self.soc.recvfrom(self.packet_size)
 
     def receive_audio(self):
-        data, client = self.soc.recvfrom(self.packet_size)
+        data, _ = self.soc.recvfrom(self.packet_size)
         self.audio.play(data)
 
 
