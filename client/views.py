@@ -51,6 +51,7 @@ class MainHeaderBar(Gtk.HeaderBar):
 
     def on_timeout(self, _):
         self.update_label()
+        # GLib requires function to return true to continue timeout
         return True
 
 
@@ -100,6 +101,7 @@ class ChannelList(Gtk.Frame):
 
     def on_timeout(self, _):
         self.set_connected_channels()
+        # GLib requires function to return true to continue timeout
         return True
 
     def create_channel_list(self):
