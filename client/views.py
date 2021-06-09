@@ -130,7 +130,7 @@ class ChannelList(Gtk.Frame):
         checkbox = Gtk.CheckButton(label=channel["display"])
 
         def checkbox_callback(channel_id):
-            self.channel_click(channel_id)
+            self.channel_click(channel_id, checkbox)
             self.set_connected_channels()
 
         checkbox.connect("clicked", lambda _: checkbox_callback(channel_id))
@@ -139,14 +139,15 @@ class ChannelList(Gtk.Frame):
         row.add(box)
         return row, checkbox
 
-    def channel_click(self, channel_id):
+    def channel_click(self, channel_id, checkbox):
         if not gui_callbacks.time_lock() or not gui_callbacks.is_connected():
             return
         if gui_callbacks.is_channel_connected(channel_id):
             return gui_callbacks.disconnect_channel()
 
         if gui_callbacks.is_protected_channel(channel_id):
-            PasswordModal(self.main_window).run()
+            if checkbox.get_active():
+                PasswordModal(self.main_window).run()
         else:
             gui_callbacks.connect_channel(channel_id)
 
@@ -162,6 +163,7 @@ class PasswordModal(Gtk.Dialog):
         label.set_justify(Gtk.Justification.CENTER)
 
         self.entry = Gtk.Entry()
+        self.entry.connect("activate", self.on_enter, self, Gtk.ResponseType.OK)
         self.entry.set_max_length(MAX_PASSWORD_LEN)
         self.entry.set_margin_bottom(30)
         self.entry.set_margin_left(30)
@@ -171,6 +173,9 @@ class PasswordModal(Gtk.Dialog):
         self.vbox.add(self.entry)
         self.vbox.set_border_width(10)
         self.show_all()
+
+    def on_enter(self, _, dialog, response):
+        self.on_response(dialog, response)
 
     def on_response(self, dialog, response):
         if response == Gtk.ResponseType.OK:
@@ -193,7 +198,7 @@ class ServerModal(Gtk.Dialog):
         label.set_justify(Gtk.Justification.CENTER)
 
         self.entry = Gtk.Entry()
-        self.entry.connect("activate", self.on_response, self, Gtk.ResponseType.OK)
+        self.entry.connect("activate", self.on_enter, self, Gtk.ResponseType.OK)
         self.entry.set_max_length(MAX_SERVER_ADDRESS)
         self.entry.set_margin_bottom(30)
         self.entry.set_margin_left(30)
@@ -203,6 +208,9 @@ class ServerModal(Gtk.Dialog):
         self.vbox.add(self.entry)
         self.vbox.set_border_width(10)
         self.show_all()
+    
+    def on_enter(self, _, dialog, response):
+        self.on_response(dialog, response)
     
     def on_response(self, dialog, response):
         if response == Gtk.ResponseType.OK:
