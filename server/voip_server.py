@@ -76,8 +76,6 @@ class ClientManager:
 class Server:
     def __init__(self, ip_address, ip_port, channel_0_pass,
                 number_of_channels):
-        #def acepted_cb(client_address, client_port):
-        #    print("Client connected to channel")
 
         ip = (ip_address, ip_port)
         self.channels = Channels(channel_0_pass, number_of_channels, ip, SingleChannel)

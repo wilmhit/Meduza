@@ -58,25 +58,13 @@ class SingleChannel(BaseServer):
         received_packets = []
 
         while len(received_packets) < len(connected_users):
-            try:
-                received_packets.append(socket.recvfrom(CHUNK))
-            except BlockingIOError: ...
+            received_packets.append(socket.recvfrom(CHUNK))
 
         if len(received_packets) > 0:
-
-            #if len(cls.temp_audio_packets) > 200:
-            #    print("Started playback")
-            #    stream = AudioStreams()
-            #    for packet in cls.temp_audio_packets:
-            #        stream.play(packet)
-            #    cls.temp_audio_packets = []
-
             mergeAudio = audioMerge(received_packets)
 
             for user in connected_users:
                 audio_pck = mergeAudio.get_audio_for_user(user)
-                #if user == connected_users[0]:
-                #    cls.temp_audio_packets.append(audio_pck)
                 cls.send_audio(audio_pck, socket, user)
 
             cls.register_inactivities(inactivity_store, received_packets,
@@ -99,7 +87,6 @@ class SingleChannel(BaseServer):
     def _thread_local(self) -> Tuple[Any]:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(self.ip)
-        sock.setblocking(False)
 
         return (sock, self.connected_users, InactivityStore())
         return (sock, self.connected_users)
