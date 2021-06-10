@@ -47,7 +47,7 @@ def mock_main():
             channel_address = ("127.0.0.1", channels.port)
             client = DummyAudioClient(local_address,
                                     channel_address,
-                                    soc=channels.metadata_socket)
+                                    soc=channels.soc)
             client.start()
         else:
             logger.warn("Could not establish connection")
