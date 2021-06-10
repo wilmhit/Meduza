@@ -1,4 +1,4 @@
-import socket
+import socket as udp
 import time
 from threading import Thread
 from server_utils.abstract import BaseServer
@@ -29,6 +29,7 @@ class SingleChannel(BaseServer):
             try:
                 received_packets.append(socket.recvfrom(CHUNK))
             except BlockingIOError: ...
+            except udp.timeout: ...
 
         if len(received_packets) > 0:
             mergeAudio = audioMerge(received_packets)
@@ -55,8 +56,9 @@ class SingleChannel(BaseServer):
         socket.sendto(receive, user)
 
     def _thread_local(self) -> Tuple[Any]:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock = udp.socket(udp.AF_INET, udp.SOCK_DGRAM)
         sock.setblocking(False)
+        sock.settimeout(1)
         sock.bind(self.ip)
 
         return (sock, self.connected_users, InactivityStore())
