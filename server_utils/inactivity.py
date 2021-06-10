@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 class InactivityStore:
-    def __init__(self, inactivity_treshold=100):
+    def __init__(self, inactivity_treshold=500):
         self.treshold = inactivity_treshold
         self.keys = defaultdict(lambda: 0)
 

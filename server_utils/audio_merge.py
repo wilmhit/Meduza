@@ -2,24 +2,24 @@ import pickle
 
 class audioMerge:
     def __init__(self, pck_list) -> None:
-        self.audio_fragments = [pickle.loads(pck[0]) for pck in pck_list]
-        self.empty_fragment = self.audio_fragments[0] - self.audio_fragments[0]
-        self.users = [pck[1] for pck in pck_list]
-        self.fragments_with_users = zip(self.users, self.audio_fragments)
-        pass
+        self.audio_fragments = {}
+        for data, user in pck_list:
+            self.audio_fragments[user] = pickle.loads(data)
+            
+        sample_packet = pickle.loads(pck_list[0][0])
+        self.empty_fragment = sample_packet - sample_packet
 
-    def get_audio_for_user(self, user):
+    def get_audio_for_user(self, excluded_user):
         fragments_to_merge = []
 
-        for x in self.fragments_with_users:
-            if x[0] != user:
-                fragments_to_merge.append(x[1])
+        for user in self.audio_fragments:
+            if user != excluded_user:
+                fragments_to_merge.append(self.audio_fragments[user])
 
         if len(fragments_to_merge) == 0:
             return pickle.dumps(self.empty_fragment)
         
         merged_audio = fragments_to_merge[0]
-
         for x in fragments_to_merge[1:]:
             merged_audio += x
 

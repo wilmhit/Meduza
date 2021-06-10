@@ -7,12 +7,42 @@ from typing import Any, Tuple
 from server_utils.audio_merge import audioMerge
 import pickle
 import logging
-from client.voip import AudioStreams
+import sounddevice as sd
 
 logger = logging.getLogger("server")
 
 
+_CHUNK = 1024 * 4
+CHANNELS = 1
+RATE = 44100
+SECONDS_AUDIO = _CHUNK / (RATE * 4)
+
 CHUNK = 4249
+
+class AudioStreams:
+    def __init__(self):
+        sd.default.samplerate = RATE
+        sd.default.channels = 1
+        self.stream = sd.Stream()
+        self.stream.start()
+        self.empty_record, _ = self.stream.read(self.frames_in_chunk)
+        self.empty_record = self.empty_record - self.empty_record
+
+    def record_dummy(self):
+        self.stream.read(self.frames_in_chunk)
+        return pickle.dumps(self.empty_record)
+
+    @property
+    def frames_in_chunk(self):
+        return int(SECONDS_AUDIO * RATE)
+
+    def record(self):
+        audio, _ = self.stream.read(self.frames_in_chunk)
+        return pickle.dumps(audio)
+
+    def play(self, audio):
+        self.stream.write(pickle.loads(audio))
+
 
 class SingleChannel(BaseServer):
 
@@ -26,26 +56,27 @@ class SingleChannel(BaseServer):
     @classmethod
     def _main_loop(cls, socket, connected_users, inactivity_store) -> None:
         received_packets = []
-        try:
-            while True:
+
+        while len(received_packets) < len(connected_users):
+            try:
                 received_packets.append(socket.recvfrom(CHUNK))
-        except BlockingIOError: ...
+            except BlockingIOError: ...
 
         if len(received_packets) > 0:
 
-            if len(cls.temp_audio_packets) > 200:
-                print("Started playback")
-                stream = AudioStreams()
-                for packet in cls.temp_audio_packets:
-                    stream.play(packet)
-                cls.temp_audio_packets = []
+            #if len(cls.temp_audio_packets) > 200:
+            #    print("Started playback")
+            #    stream = AudioStreams()
+            #    for packet in cls.temp_audio_packets:
+            #        stream.play(packet)
+            #    cls.temp_audio_packets = []
 
             mergeAudio = audioMerge(received_packets)
 
             for user in connected_users:
                 audio_pck = mergeAudio.get_audio_for_user(user)
-                if user == connected_users[0]:
-                    cls.temp_audio_packets.append(audio_pck)
+                #if user == connected_users[0]:
+                #    cls.temp_audio_packets.append(audio_pck)
                 cls.send_audio(audio_pck, socket, user)
 
             cls.register_inactivities(inactivity_store, received_packets,
