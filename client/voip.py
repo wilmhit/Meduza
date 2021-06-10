@@ -53,11 +53,12 @@ class AudioStreams:
         sd.default.channels = 1
         self.stream = sd.Stream()
         self.stream.start()
-        self.dummy_record, _ = self.stream.read(self.frames_in_chunk)
+        self.empty_record, _ = self.stream.read(self.frames_in_chunk)
+        self.empty_record = self.empty_record - self.empty_record
 
     def record_dummy(self):
         self.stream.read(self.frames_in_chunk)
-        return pickle.dumps(self.dummy_record)
+        return pickle.dumps(self.empty_record)
 
     @property
     def frames_in_chunk(self):

@@ -7,8 +7,8 @@ from server_utils.signal import Signal
 TIMEOUT_SEC = 5
 logger = logging.getLogger("client")
 
-class ConnetionError(BaseException):
-    """Cannot connect to server"""
+class ServerDenial(BaseException):
+    """Cannot connect to channel"""
     pass
 
 
@@ -20,9 +20,9 @@ class PasswordError(BaseException):
 class ChannelManager():
     def __init__(self, server_address, local_address):
         self.server_address = server_address
-        self.metadata_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.metadata_socket.bind(local_address)
-        self.metadata_socket.settimeout(TIMEOUT_SEC)
+        self.soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.soc.bind(local_address)
+        self.soc.settimeout(TIMEOUT_SEC)
         self.port = None
 
     def ping(self) -> bool:
@@ -30,8 +30,8 @@ class ChannelManager():
             message = Signal()
             message.code = b"PNG"
 
-            self.metadata_socket.sendto(message.get_message(), self.server_address)
-            returned, _ = self.metadata_socket.recvfrom(32)
+            self.soc.sendto(message.get_message(), self.server_address)
+            returned, _ = self.soc.recvfrom(32)
 
             returned = Signal(returned)
             result = returned.code == b"PGR"
@@ -45,7 +45,7 @@ class ChannelManager():
     def disconnect_channel(self):
         self._send_disconnect_message()
         self.port = None
-        self.clear_socket(self.metadata_socket)
+        self.clear_socket(self.soc)
 
     def connect_channel(self, channel: int, password=None) -> bool:
         raise TypeError("lolo")
@@ -56,24 +56,25 @@ class ChannelManager():
     def _send_disconnect_message(self):
         message = Signal()
         message.code = b"XXX"
-        self.metadata_socket.sendto(message.get_message(), self.server_address)
+        self.soc.sendto(message.get_message(), self.server_address)
 
     def _send_connect_message(self, channel: int):
         message = Signal()
         message.code = b"CON"
         message.two_byte = channel
-        self.metadata_socket.sendto(message.get_message(), self.server_address)
+        self.soc.sendto(message.get_message(), self.server_address)
 
     def _read_channel_connection_response(self, response: bytes) -> bool:
         response = Signal(response)
+
         if response.code == b"DEN":
-            return False
+            raise ServerDenial(msg)
         if response.code == b"PRQ":
             raise PasswordError()
         if not response.code == b"ACC":
             msg = "Server sent invalid response"
             logger.warn(msg)
-            raise ConnectionError(msg)
+            raise ServerDenial(msg)
 
         if (port := int.from_bytes(response.two_byte, "big")) != 0:
             self.port = port
@@ -91,7 +92,7 @@ class ChannelManager():
     def _connect_channel(self, channel: int) -> bool:
         try:
             self._send_connect_message(channel)
-            response, _ = self.metadata_socket.recvfrom(32)
+            response, _ = self.soc.recvfrom(32)
             return self._read_channel_connection_response(response)
         except socket.timeout:
             return False
@@ -99,7 +100,7 @@ class ChannelManager():
     def _connect_securely(self, channel: int, password: str) -> bool:
         try:
             self._send_secure_connect_message(channel, password)
-            response, _ = self.metadata_socket.recvfrom(32)
+            response, _ = self.soc.recvfrom(32)
             return self._read_channel_connection_response(response)
         except socket.timeout:
             return False

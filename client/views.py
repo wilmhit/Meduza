@@ -34,6 +34,9 @@ class MainHeaderBar(Gtk.HeaderBar):
         self.pack_start(self.disconnect_button)
         self.timeout_id = GLib.timeout_add(500, self.on_timeout, None)
 
+    def update_label(self):
+        self.disconnect_button.set_label(self.get_connect_label())
+
     def get_connect_label(self):
         if gui_callbacks.is_connected():
             return "Disconnect"
@@ -47,18 +50,16 @@ class MainHeaderBar(Gtk.HeaderBar):
         button.set_label(self.get_connect_label())
 
     def on_timeout(self, _):
-        if self.get_connect_label() != self.disconnect_button.get_label():
-            self.disconnect_button.set_label(self.get_connect_label())
+        self.update_label()
+        # GLib requires function to return true to continue timeout
         return True
 
 
 class MainContent(Gtk.Grid):
-    def __init__(self, parent):
+    def __init__(self, main_window):
         Gtk.Grid.__init__(self)
         self.set_column_spacing(10)
         self.set_row_spacing(10)
-        self.parent = parent
-        self.channels = self.create_channel_list()
 
         boom_button = Gtk.Button(label="Detonate")
         mute_mic_checkbox = Gtk.CheckButton(label="Mute mic")
@@ -71,24 +72,37 @@ class MainContent(Gtk.Grid):
         mute_all_checkbox.set_margin_right(50)
         mute_mic_checkbox.set_margin_right(50)
 
-        channel_list = Gtk.ListBox()
-        framed_channel_list = Gtk.Frame()
-        framed_channel_list.add(channel_list)
-
         boom_button.connect("clicked", gui_callbacks.boom_callback)
         mute_mic_checkbox.connect("clicked", gui_callbacks.mute_mic)
         mute_all_checkbox.connect("clicked", gui_callbacks.mute_spk)
 
-        for channel in self.channels:
-            channel_list.add(channel[0])
-
-        gui_state["update_gui"] = self.set_connected_channels
+        channel_list = ChannelList(main_window)
 
         # Row Column Width Height        R  C  W  H
-        self.attach(framed_channel_list, 0, 0, 1, 4)
+        self.attach(channel_list, 0, 0, 1, 4)
         self.attach(mute_all_checkbox, 1, 0, 1, 1)
         self.attach(mute_mic_checkbox, 1, 1, 1, 1)
         self.attach(boom_button, 1, 2, 1, 1)
+
+
+class ChannelList(Gtk.Frame):
+    def __init__(self, main_window):
+        Gtk.Frame.__init__(self)
+        self.main_window = main_window
+
+        self.channels = self.create_channel_list()
+        channel_list = Gtk.ListBox()
+
+        for channel in self.channels:
+            channel_list.add(channel[0])
+
+        self.add(channel_list)
+        self.timeout_id = GLib.timeout_add(1000, self.on_timeout, None)
+
+    def on_timeout(self, _):
+        self.set_connected_channels()
+        # GLib requires function to return true to continue timeout
+        return True
 
     def create_channel_list(self):
         return [
@@ -107,6 +121,7 @@ class MainContent(Gtk.Grid):
             checkbox.set_active(state)
 
     def map_channel(self, channel, channel_id):
+        # TODO Channel row to separate component
         row = Gtk.ListBoxRow()
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         box.set_border_width(5)
@@ -115,7 +130,7 @@ class MainContent(Gtk.Grid):
         checkbox = Gtk.CheckButton(label=channel["display"])
 
         def checkbox_callback(channel_id):
-            self.channel_click(channel_id)
+            self.channel_click(channel_id, checkbox)
             self.set_connected_channels()
 
         checkbox.connect("clicked", lambda _: checkbox_callback(channel_id))
@@ -124,17 +139,17 @@ class MainContent(Gtk.Grid):
         row.add(box)
         return row, checkbox
 
-    def channel_click(self, channel_id):
+    def channel_click(self, channel_id, checkbox):
         if not gui_callbacks.time_lock() or not gui_callbacks.is_connected():
             return
         if gui_callbacks.is_channel_connected(channel_id):
             return gui_callbacks.disconnect_channel()
 
         if gui_callbacks.is_protected_channel(channel_id):
-            PasswordModal(self.parent).run()
+            if checkbox.get_active():
+                PasswordModal(self.main_window).run()
         else:
             gui_callbacks.connect_channel(channel_id)
-
 
 class PasswordModal(Gtk.Dialog):
     def __init__(self, parent):
@@ -148,6 +163,7 @@ class PasswordModal(Gtk.Dialog):
         label.set_justify(Gtk.Justification.CENTER)
 
         self.entry = Gtk.Entry()
+        self.entry.connect("activate", self.on_enter, self, Gtk.ResponseType.OK)
         self.entry.set_max_length(MAX_PASSWORD_LEN)
         self.entry.set_margin_bottom(30)
         self.entry.set_margin_left(30)
@@ -157,6 +173,9 @@ class PasswordModal(Gtk.Dialog):
         self.vbox.add(self.entry)
         self.vbox.set_border_width(10)
         self.show_all()
+
+    def on_enter(self, _, dialog, response):
+        self.on_response(dialog, response)
 
     def on_response(self, dialog, response):
         if response == Gtk.ResponseType.OK:
@@ -179,6 +198,7 @@ class ServerModal(Gtk.Dialog):
         label.set_justify(Gtk.Justification.CENTER)
 
         self.entry = Gtk.Entry()
+        self.entry.connect("activate", self.on_enter, self, Gtk.ResponseType.OK)
         self.entry.set_max_length(MAX_SERVER_ADDRESS)
         self.entry.set_margin_bottom(30)
         self.entry.set_margin_left(30)
@@ -188,7 +208,10 @@ class ServerModal(Gtk.Dialog):
         self.vbox.add(self.entry)
         self.vbox.set_border_width(10)
         self.show_all()
-
+    
+    def on_enter(self, _, dialog, response):
+        self.on_response(dialog, response)
+    
     def on_response(self, dialog, response):
         if response == Gtk.ResponseType.OK:
             gui_callbacks.connect_to_server(self.entry.get_text())
