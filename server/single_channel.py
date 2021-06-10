@@ -12,42 +12,10 @@ import sounddevice as sd
 logger = logging.getLogger("server")
 
 
-_CHUNK = 1024 * 4
-CHANNELS = 1
-RATE = 44100
-SECONDS_AUDIO = _CHUNK / (RATE * 4)
-
 CHUNK = 4249
-
-class AudioStreams:
-    def __init__(self):
-        sd.default.samplerate = RATE
-        sd.default.channels = 1
-        self.stream = sd.Stream()
-        self.stream.start()
-        self.empty_record, _ = self.stream.read(self.frames_in_chunk)
-        self.empty_record = self.empty_record - self.empty_record
-
-    def record_dummy(self):
-        self.stream.read(self.frames_in_chunk)
-        return pickle.dumps(self.empty_record)
-
-    @property
-    def frames_in_chunk(self):
-        return int(SECONDS_AUDIO * RATE)
-
-    def record(self):
-        audio, _ = self.stream.read(self.frames_in_chunk)
-        return pickle.dumps(audio)
-
-    def play(self, audio):
-        self.stream.write(pickle.loads(audio))
 
 
 class SingleChannel(BaseServer):
-
-    temp_audio_packets = []
-
     def __init__(self, channel_num, ip:Tuple[str, int], connected_users) -> None:
         self.channel_num = channel_num
         self.ip = ip
@@ -58,7 +26,9 @@ class SingleChannel(BaseServer):
         received_packets = []
 
         while len(received_packets) < len(connected_users):
-            received_packets.append(socket.recvfrom(CHUNK))
+            try:
+                received_packets.append(socket.recvfrom(CHUNK))
+            except BlockingIOError: ...
 
         if len(received_packets) > 0:
             mergeAudio = audioMerge(received_packets)
@@ -86,6 +56,7 @@ class SingleChannel(BaseServer):
 
     def _thread_local(self) -> Tuple[Any]:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.blocking(False)
         sock.bind(self.ip)
 
         return (sock, self.connected_users, InactivityStore())
