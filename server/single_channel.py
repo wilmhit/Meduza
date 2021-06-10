@@ -56,7 +56,7 @@ class SingleChannel(BaseServer):
 
     def _thread_local(self) -> Tuple[Any]:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.blocking(False)
+        sock.setblocking(False)
         sock.bind(self.ip)
 
         return (sock, self.connected_users, InactivityStore())
