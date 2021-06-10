@@ -39,7 +39,8 @@ class ConnectionManager(BaseServer):
 
         self.shared_vars["connection_validated"] = True
         channel = self.get_selected_channel()
-        if not channel:
+        if type(channel) != int:
+            logger.debug("Waiting for channel selection")
             return
 
         try:
@@ -59,7 +60,10 @@ class ConnectionManager(BaseServer):
             self.shared_vars["disconnect_channel"]()
 
     def connect_to_channel(self, channel):
-        self.connection.connect_channel(channel)
+        if channel == 0:
+            self.connection.connect_channel(channel, password=self.shared_vars["password"])
+        else:
+            self.connection.connect_channel(channel)
         voip_address = self.server_address[0], self.connection.port
         client = VoipClient(voip_address, self.connection.soc)
         client.loop_while(shared_vars)
