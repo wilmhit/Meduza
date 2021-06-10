@@ -29,7 +29,7 @@ class SingleChannel(BaseServer):
             try:
                 received_packets.append(socket.recvfrom(CHUNK))
             except BlockingIOError: ...
-            except udp.timeout: ...
+            except udp.timeout: break
 
         if len(received_packets) > 0:
             mergeAudio = audioMerge(received_packets)
