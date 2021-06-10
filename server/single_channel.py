@@ -7,6 +7,7 @@ from typing import Any, Tuple
 from server_utils.audio_merge import audioMerge
 import pickle
 import logging
+from client.voip import AudioStreams
 
 logger = logging.getLogger("server")
 
@@ -14,6 +15,9 @@ logger = logging.getLogger("server")
 CHUNK = 4249
 
 class SingleChannel(BaseServer):
+
+    temp_audio_packets = []
+
     def __init__(self, channel_num, ip:Tuple[str, int], connected_users) -> None:
         self.channel_num = channel_num
         self.ip = ip
@@ -24,16 +28,24 @@ class SingleChannel(BaseServer):
         received_packets = []
         try:
             while True:
-                data, user = socket.recvfrom(CHUNK)
-                received_packets.append((data, user))
+                received_packets.append(socket.recvfrom(CHUNK))
         except BlockingIOError: ...
 
         if len(received_packets) > 0:
+
+            if len(cls.temp_audio_packets) > 200:
+                print("Started playback")
+                stream = AudioStreams()
+                for packet in cls.temp_audio_packets:
+                    stream.play(packet)
+                cls.temp_audio_packets = []
 
             mergeAudio = audioMerge(received_packets)
 
             for user in connected_users:
                 audio_pck = mergeAudio.get_audio_for_user(user)
+                if user == connected_users[0]:
+                    cls.temp_audio_packets.append(audio_pck)
                 cls.send_audio(audio_pck, socket, user)
 
             cls.register_inactivities(inactivity_store, received_packets,
