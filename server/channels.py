@@ -14,34 +14,25 @@ class Channels:
         self.main_ip_address = ip_address
         self.ThreadClass = ThreadClass
 
-        self.channels = [{
-            "port": PORT_MIN,
-            "password": channel_0_pass,
-            "connected_users": [],
-            "thread": None
-        }]
+        self.channels = []
+        self.channels.append(self.create_channel(0, channel_0_pass))
 
         for num in range(1, NUMBER_OF_CHANNELS):
-            self.create_channel(num)
+            self.channels.append(self.create_channel(num))
 
-    def create_channel(self, channel_num):
+    def create_channel(self, channel_num, password=None):
         port = self.get_port_num()
-
-        if channel_num not in self.channels:
-            self.channels.append({
-                "port": port,
-                "password": None,
-                "connected_users": [],
-                "thread": None
-            })
-
-            channel_ip = (self.main_ip_address[0], port)
-            thread = self.ThreadClass(channel_num,
-                                    channel_ip, 
-                                    self.channels[channel_num]['connected_users'])
-
-            self.channels[channel_num]["thread"] = thread
-        
+        channel = {
+            "port": port,
+            "password": password,
+            "connected_users": [],
+            "thread": None
+        }
+        channel_ip = (self.main_ip_address[0], port)
+        thread = self.ThreadClass(channel_num, channel_ip,
+                                  channel['connected_users'])
+        channel["thread"] = thread
+        return channel
 
     def get_port_num(self):
         port = randint(PORT_MIN, PORT_MAX)
