@@ -2,6 +2,7 @@ import socket
 import time
 import logging
 
+from server_utils.hashing import hash_pw
 from server_utils.signal import Signal
 
 TIMEOUT_SEC = 5
@@ -48,9 +49,15 @@ class ChannelManager():
         self.clear_socket(self.soc)
 
     def connect_channel(self, channel: int, password=None) -> bool:
-        if password is not None:
-            return self._connect_securely(channel, password)
-        return self._connect_channel(channel)
+        try:
+            if password is not None:
+                self._send_secure_connect_message(channel, password)
+            else:
+                self._send_connect_message(channel)
+            response, _ = self.soc.recvfrom(32)
+            self._read_channel_connection_response(response)
+        except socket.timeout:
+            raise ServerDenial("Did not receive server response")
 
     def _send_disconnect_message(self):
         message = Signal()
@@ -63,11 +70,11 @@ class ChannelManager():
         message.two_byte = channel
         self.soc.sendto(message.get_message(), self.server_address)
 
-    def _read_channel_connection_response(self, response: bytes) -> bool:
+    def _read_channel_connection_response(self, response: bytes) -> None:
         response = Signal(response)
 
         if response.code == b"DEN":
-            raise ServerDenial(msg)
+            raise ServerDenial("Server denied connection")
         if response.code == b"PRQ":
             raise PasswordError()
         if not response.code == b"ACC":
@@ -79,30 +86,12 @@ class ChannelManager():
             self.port = port
             logger.info(f"Audio port set to: {port}")
 
-        return True
-
     def _send_secure_connect_message(self, channel: int, password: str):
         message = Signal()
-        message.code = "PAS"
+        message.code = b"PAS"
         message.two_byte = channel
-        message.password = hash_pw(password)
+        message.rest = hash_pw(password.encode(), 27)
         self.soc.sendto(message.get_message(), self.server_address)
-
-    def _connect_channel(self, channel: int) -> bool:
-        try:
-            self._send_connect_message(channel)
-            response, _ = self.soc.recvfrom(32)
-            return self._read_channel_connection_response(response)
-        except socket.timeout:
-            return False
-
-    def _connect_securely(self, channel: int, password: str) -> bool:
-        try:
-            self._send_secure_connect_message(channel, password)
-            response, _ = self.soc.recvfrom(32)
-            return self._read_channel_connection_response(response)
-        except socket.timeout:
-            return False
 
     @staticmethod
     def clear_socket(soc):
@@ -111,9 +100,3 @@ class ChannelManager():
                 soc.recvfrom(1)
         except socket.timeout:
             pass
-
-
-
-
-def hash_pw(password: bytes) -> bytes:
-    return b"2" * 27  # TODO
