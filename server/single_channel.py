@@ -1,4 +1,4 @@
-import socket
+import socket as udp
 import time
 from threading import Thread
 from server_utils.abstract import BaseServer
@@ -7,11 +7,13 @@ from typing import Any, Tuple
 from server_utils.audio_merge import audioMerge
 import pickle
 import logging
+import sounddevice as sd
 
 logger = logging.getLogger("server")
 
 
 CHUNK = 4249
+
 
 class SingleChannel(BaseServer):
     def __init__(self, channel_num, ip:Tuple[str, int], connected_users) -> None:
@@ -22,14 +24,14 @@ class SingleChannel(BaseServer):
     @classmethod
     def _main_loop(cls, socket, connected_users, inactivity_store) -> None:
         received_packets = []
-        try:
-            while True:
-                data, user = socket.recvfrom(CHUNK)
-                received_packets.append((data, user))
-        except BlockingIOError: ...
+
+        while len(received_packets) < len(connected_users):
+            try:
+                received_packets.append(socket.recvfrom(CHUNK))
+            except BlockingIOError: ...
+            except udp.timeout: break
 
         if len(received_packets) > 0:
-
             mergeAudio = audioMerge(received_packets)
 
             for user in connected_users:
@@ -54,9 +56,10 @@ class SingleChannel(BaseServer):
         socket.sendto(receive, user)
 
     def _thread_local(self) -> Tuple[Any]:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind(self.ip)
+        sock = udp.socket(udp.AF_INET, udp.SOCK_DGRAM)
         sock.setblocking(False)
+        sock.settimeout(1)
+        sock.bind(self.ip)
 
         return (sock, self.connected_users, InactivityStore())
         return (sock, self.connected_users)

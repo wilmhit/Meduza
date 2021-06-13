@@ -16,7 +16,7 @@ logger = create_logger("client", DEBUG)
 
 def main():
     try:
-        local_address = ("127.0.0.1", randint(PORT_MIN, PORT_MAX))
+        local_address = ("0.0.0.0", randint(PORT_MIN, PORT_MAX))
         connection_manager = ConnectionManager(gui_state, local_address)
 
         connection_manager.start()

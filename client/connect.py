@@ -34,7 +34,8 @@ class ConnectionManager(BaseServer):
         if not self.connection:
             self.connection = self.make_connection(self.server_address,
                                                    self.local_address)
-            logger.debug("Waiting for connection")
+            if not self.connection:
+                self.shared_vars["server_ip"] = ""
             return
 
         self.shared_vars["connection_validated"] = True

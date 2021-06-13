@@ -7,7 +7,7 @@ from server_utils.logger import create_logger
 
 from .voip_server import Server
 
-UDP_IP = "127.0.0.1"
+UDP_IP = "0.0.0.0"
 UDP_PORT = 50001
 PASSWORD = "pass"
 NUM_OF_CHANNELS = 10
