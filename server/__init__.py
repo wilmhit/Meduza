@@ -6,11 +6,12 @@ from server_utils.echo import EchoServer
 from server_utils.logger import create_logger
 
 from .voip_server import Server
+from os import environ
 
 UDP_IP = "0.0.0.0"
-UDP_PORT = 50001
-PASSWORD = "pass"
-NUM_OF_CHANNELS = 10
+UDP_PORT = int(environ.get("MEDUZA_PORT") or 50001)
+PASSWORD = environ.get("MEDUZA_PASSWORD") or "meduza"
+NUM_OF_CHANNELS = 5
 
 
 def main():
